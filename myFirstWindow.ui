@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>423</width>
+    <height>315</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,8 +21,28 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="1" column="0" colspan="3">
     <widget class="QTextEdit" name="textEdit"/>
+   </item>
+   <item row="0" column="2">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="0" column="1">
+    <widget class="QPushButton" name="exitButton">
+     <property name="text">
+      <string>Exit</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
@@ -35,8 +55,8 @@
    <slot>pushButton_click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>70</x>
-     <y>22</y>
+     <x>61</x>
+     <y>23</y>
     </hint>
     <hint type="destinationlabel">
      <x>162</x>
@@ -44,8 +64,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>exitButton</sender>
+   <signal>clicked()</signal>
+   <receiver>Form</receiver>
+   <slot>exitButton_click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>117</x>
+     <y>18</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>143</x>
+     <y>4</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>pushButton_click()</slot>
+  <slot>exitButton_click()</slot>
  </slots>
 </ui>
