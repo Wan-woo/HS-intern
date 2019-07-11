@@ -1,12 +1,14 @@
 import sys
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QHeaderView
 from PyQt5.QtGui import QIcon
-from myFirstWindow import Ui_Form
+#from qtpy import QtWidgets
+#from qtpy.QtWidgets import QMessageBox, QTableWidgetItem, QHeaderView
+#from qtpy.QtGui import QIcon
+from myFirstWindow import Ui_MainWindow
+import qtpy.QtWidgets
 
-
-
-class MyForm(QtWidgets.QWidget, Ui_Form):
+class MyForm(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(MyForm, self).__init__()
         self.setupUi(self)
@@ -14,7 +16,19 @@ class MyForm(QtWidgets.QWidget, Ui_Form):
         self.setWindowIcon(QIcon('logo.png'))
 
     def pushButton_click(self):
-        self.textEdit.setText("你点击了按钮")
+        self.tableWidget.setColumnCount(3)
+        self.tableWidget.setRowCount(2)
+        i = 0
+        j = 0
+        columnWidth = self.tableWidget.width() / self.tableWidget.columnCount()
+        rowHeight = self.tableWidget.height() / self.tableWidget.rowCount()
+        value = 'test'
+        self.tableWidget.setItem(i, j, QTableWidgetItem(value))
+        #self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
+        #self.tableWidget.horizontalHeader().setCascadingSectionResizes(True)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableWidget.verticalHeader().setVisible(True)
+        self.tableWidget.horizontalHeader().setVisible(True)
 
     def exitButton_click(self):
         reply = QMessageBox.question(self, 'Message',
