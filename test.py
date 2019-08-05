@@ -1,11 +1,15 @@
 import sys
+import difflib
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QHeaderView
 from PyQt5.QtGui import QIcon
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtCore import QUrl
+import resource.connectOracle as oracle
 #from qtpy import QtWidgets
 #from qtpy.QtWidgets import QMessageBox, QTableWidgetItem, QHeaderView
 #from qtpy.QtGui import QIcon
-from myFirstWindow import Ui_MainWindow
+from loginPage import Ui_MainWindow
 import qtpy.QtWidgets
 
 class MyForm(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -16,14 +20,17 @@ class MyForm(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setWindowIcon(QIcon('logo.png'))
 
     def pushButton_click(self):
+        rlist = oracle.connect_test()
         self.tableWidget.setColumnCount(3)
-        self.tableWidget.setRowCount(2)
+        self.tableWidget.setRowCount(len(rlist))
         i = 0
         j = 0
         columnWidth = self.tableWidget.width() / self.tableWidget.columnCount()
         rowHeight = self.tableWidget.height() / self.tableWidget.rowCount()
-        value = 'test'
-        self.tableWidget.setItem(i, j, QTableWidgetItem(value))
+        for row in rlist:
+            self.tableWidget.setItem(i, 0, QTableWidgetItem(str(row[0])))
+            self.tableWidget.setItem(i, 1, QTableWidgetItem(str(row[1])))
+            i += 1
         #self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         #self.tableWidget.horizontalHeader().setCascadingSectionResizes(True)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
