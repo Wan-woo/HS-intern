@@ -5,12 +5,12 @@ from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QHeaderView
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
-import resource.connectOracle as oracle
+#import resource.connectOracle as oracle
 #from qtpy import QtWidgets
 #from qtpy.QtWidgets import QMessageBox, QTableWidgetItem, QHeaderView
 #from qtpy.QtGui import QIcon
 from loginPage import Ui_MainWindow
-import qtpy.QtWidgets
+#import qtpy.QtWidgets
 
 class MyForm(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
