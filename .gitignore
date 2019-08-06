@@ -1,0 +1,12 @@
+
+*.xml
+*.iml
+*.pyc
+*.zip
+*.manifest
+resource/sql2.txt
+resource/result_comparation.html
+test.spec
+需求规格说明书.docx
+原型设计.rp
+resource/sql1.txt

@@ -3,6 +3,7 @@ import difflib
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QHeaderView
 from PyQt5.QtGui import QIcon
+from PyQt5 import QtCore
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
 #import resource.connectOracle as oracle
@@ -48,6 +49,7 @@ class MyForm(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 if __name__ == '__main__':
+    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app = QtWidgets.QApplication(sys.argv)
     myForm = MyForm()
     myForm.show()
