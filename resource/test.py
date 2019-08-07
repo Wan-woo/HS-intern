@@ -1,5 +1,15 @@
-from PyQt5.QtCore import *
+# -*- coding: utf-8 -*-#
+
+#-------------------------------------------------------------------------------
+# Name:         导航条控件
+# Description:
+# Author:       lgk
+# Date:         2018/6/21
+#-------------------------------------------------------------------------------
+
+import sys
 from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 class NavigationWidget(QWidget):
@@ -14,12 +24,10 @@ class NavigationWidget(QWidget):
         self.rowHeight = 40
         self.currentIndex = 0 #当前选择的项索引
         self.listItems = []
-        self.checkBoxList = []
         self.cursorIndex = -1 #当前光标所在位置的项索引
 
         self.setMouseTracking(True)
         self.setMinimumWidth(120)
-
 
     def addItem(self, item):
         self.listItems.append(item)
@@ -27,10 +35,6 @@ class NavigationWidget(QWidget):
 
     def setItems(self, items):
         self.listItems = items
-        for i in range(len(items)):
-            self.checkBoxList.append(QCheckBox(self))
-            self.checkBoxList[i].move(40, self.rowHeight*i + 20)
-            self.checkBoxList[i].toggle()
         self.update()
 
     def setBackgroundColor(self, color):
@@ -90,9 +94,49 @@ class NavigationWidget(QWidget):
         if  idx< len(self.listItems):
             self.currentIndex = int(idx)
             self.currentItemChanged.emit(int(idx), self.listItems[int(idx)])
-            self.checkBoxList[self.cursorIndex].toggle()
             self.update()
 
     def leaveEvent(self, QEvent):
         self.cursorIndex = -1
         self.update()
+
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.resize(600, 400)
+        self.setWindowTitle(u'导航条控件')
+
+        mainWidget = QWidget()
+        self.setCentralWidget(mainWidget)
+
+        navigationWidget = NavigationWidget()
+        navigationWidget.setRowHeight(50)
+        navigationWidget.setItems([u'常规', u'高级', u'管理', u'其它', u'关于'])
+
+        self.tipsLabel = QLabel(u"请选择：")
+
+        mainLayout = QHBoxLayout(mainWidget)
+        mainLayout.setContentsMargins(0, 0, 0, 0)
+        mainLayout.setSpacing(10)
+        mainLayout.addWidget(navigationWidget, 1)
+        mainLayout.addWidget(self.tipsLabel, 3, Qt.AlignCenter)
+
+        navigationWidget.currentItemChanged[int, str].connect(self.slotCurrentItemChanged)
+        navigationWidget.setCurrentIndex(2)
+
+        self.show()
+
+    def slotCurrentItemChanged(self, index, content):
+        self.tipsLabel.setText(u"Current index and content：{} ---- {}".format(index, content))
+
+def main():
+    app = QApplication(sys.argv)
+    mainWnd = MainWindow()
+    sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()
