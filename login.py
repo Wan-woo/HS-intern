@@ -4,18 +4,12 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QHeaderView
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtCore
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QUrl
-#import resource.connectOracle as oracle
-#from qtpy import QtWidgets
-#from qtpy.QtWidgets import QMessageBox, QTableWidgetItem, QHeaderView
-#from qtpy.QtGui import QIcon
-from loginPage import Ui_MainWindow
-#import qtpy.QtWidgets
+import loginPage
+import overallPage
 
-class MyForm(QtWidgets.QMainWindow, Ui_MainWindow):
+class Login(QtWidgets.QMainWindow, loginPage.Ui_MainWindow):
     def __init__(self):
-        super(MyForm, self).__init__()
+        super(Login, self).__init__()
         self.setupUi(self)
         self.setWindowTitle("数据比对工具")
         self.setWindowIcon(QIcon('logo.png'))
@@ -47,10 +41,28 @@ class MyForm(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             return
 
+    def testConnectionButton_click(self):
+        dbAddress = self.dbAddressLine.text()
+        username = self.usernameLine.text()
+        servicename = self.servicenameLine.text()
+        password = self.passwordLine.text()
+        print(dbAddress+username+servicename+password)
+
+    def confirmButton_click(self):
+        login.close()
+        overall.show()
+
+class Overall(QtWidgets.QMainWindow, overallPage.Ui_MainWindow):
+    def __init__(self):
+        super(Overall, self).__init__()
+        self.setupUi(self)
+        self.setWindowTitle("数据比对工具")
+        self.setWindowIcon(QIcon('logo.png'))
 
 if __name__ == '__main__':
     QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app = QtWidgets.QApplication(sys.argv)
-    myForm = MyForm()
-    myForm.show()
+    login = Login()
+    overall = Overall()
+    login.show()
     sys.exit(app.exec_())

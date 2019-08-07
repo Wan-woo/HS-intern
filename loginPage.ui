@@ -77,13 +77,13 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="lineEdit_2"/>
+      <widget class="QLineEdit" name="usernameLine"/>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="lineEdit"/>
+      <widget class="QLineEdit" name="dbAddressLine"/>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="lineEdit_3"/>
+      <widget class="QLineEdit" name="servicenameLine"/>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_3">
@@ -93,7 +93,7 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QLineEdit" name="lineEdit_4">
+      <widget class="QLineEdit" name="passwordLine">
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>
        </property>
@@ -121,7 +121,7 @@
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
     </property>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="testConnectionButton">
      <property name="geometry">
       <rect>
        <x>260</x>
@@ -134,7 +134,7 @@
       <string>测试连接</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_2">
+    <widget class="QPushButton" name="confirmButton">
      <property name="geometry">
       <rect>
        <x>330</x>
@@ -161,5 +161,43 @@
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>testConnectionButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>testConnectionButton_click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>248</x>
+     <y>246</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>168</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>confirmButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>confirmButton_click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>320</x>
+     <y>243</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>382</x>
+     <y>209</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>slot2()</slot>
+  <slot>testConnectionButton_click()</slot>
+  <slot>confirmButton_click()</slot>
+ </slots>
 </ui>
