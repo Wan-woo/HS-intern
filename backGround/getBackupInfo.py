@@ -11,12 +11,15 @@
 '''
 import sqlite3
 
+"""
+        检查是否存在sqlite库，没有则创建库
+"""
 def checkSystemDb():
     sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor();
+    sqlite3Cursor = sqlite3Conn.cursor()
     sql = "SELECT * FROM sqlite_master;"
     sqlite3Cursor.execute(sql)
-    system_table_info = sqlite3Cursor.fetchall();
+    system_table_info = sqlite3Cursor.fetchall()
     if (len(system_table_info) == 0):
         print("系统数据库信息不存在")
         count = 0  # 读取行数
@@ -42,31 +45,38 @@ def checkSystemDb():
                 sqlite3Conn.commit()
                 sqlite3Conn.close()
 
+"""
+      获得备份列表
+"""
 def getBackupInfo():
-    checkSystemDb();
+    checkSystemDb()
     sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor();
+    sqlite3Cursor = sqlite3Conn.cursor()
     sqlite3Cursor.execute("select * from backupInformation;")
-    backInformationList = sqlite3Cursor.fetchall();
+    backInformationList = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return backInformationList
-
+"""
+      获得模块列表
+"""
 
 def getMoudleInfo():
     sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor();
+    sqlite3Cursor = sqlite3Conn.cursor()
     sql = "SELECT * FROM moudleList;"
     sqlite3Cursor.execute(sql)
-    moudleInfo = sqlite3Cursor.fetchall();
+    moudleInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return moudleInfo
-
+"""
+        获取功能指标列表
+"""
 def getFunctionQuotaInfo():
     sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor();
+    sqlite3Cursor = sqlite3Conn.cursor()
     sql = "SELECT * FROM functionQuotaList;"
     sqlite3Cursor.execute(sql)
-    FunctionQuotaInfo = sqlite3Cursor.fetchall();
+    FunctionQuotaInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return FunctionQuotaInfo
 
@@ -78,10 +88,10 @@ def getObjectByModule(moduleName,typeCode):
     if(typeCode!=1&typeCode!=2&typeCode!=3):
         print("参数不合法")
     sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor();
+    sqlite3Cursor = sqlite3Conn.cursor()
     sql = "SELECT * FROM moduleObject WHERE type ="+str(typeCode)+"AND modulename = "+moduleName+";"
     sqlite3Cursor.execute(sql)
-    objectInfo = sqlite3Cursor.fetchall();
+    objectInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return objectInfo
 """
@@ -92,10 +102,10 @@ def getObjectByModule(FunctionQuotaName,typeCode):
     if(typeCode!=1&typeCode!=2):
         print("参数不合法")
     sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor();
+    sqlite3Cursor = sqlite3Conn.cursor()
     sql = "SELECT * FROM moduleObject WHERE functionQuotaType ="+str(typeCode)+"AND functionQuotaName = "+FunctionQuotaName+";"
     sqlite3Cursor.execute(sql)
-    objectInfo = sqlite3Cursor.fetchall();
+    objectInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return objectInfo
 
@@ -107,10 +117,10 @@ def getObjectByModule(objectNamePart,typeCode):
     if(typeCode!=1&typeCode!=2&typeCode!=3):
         print("参数不合法")
     sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor();
+    sqlite3Cursor = sqlite3Conn.cursor()
     sql = "SELECT * FROM backupObjectNameList WHERE backupVersion ='' AND ObjectType = "+str(typeCode)+"AND objectName LIKE+'%"+objectNamePart+"%';"
     sqlite3Cursor.execute(sql)
-    objectInfo = sqlite3Cursor.fetchall();
+    objectInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return objectInfo
 
@@ -122,9 +132,9 @@ def getObjectByModule(typeCode):
     if(typeCode!=1&typeCode!=2&typeCode!=3):
         print("参数不合法")
     sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor();
+    sqlite3Cursor = sqlite3Conn.cursor()
     sql = "SELECT * FROM backupObjectNameList WHERE backupVersion ='' AND ObjectType = "+str(typeCode)+";"
     sqlite3Cursor.execute(sql)
-    objectList = sqlite3Cursor.fetchall();
+    objectList = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return objectList
