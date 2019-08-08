@@ -55,9 +55,9 @@ class Login(QtWidgets.QMainWindow, loginPage.Ui_MainWindow):
 class Overall(QtWidgets.QMainWindow, overallPage.Ui_MainWindow):
     def __init__(self):
         super(Overall, self).__init__()
-        self.setupUi(self)
-        self.setWindowTitle("数据比对工具")
-        self.setWindowIcon(QIcon('logo.png'))
+        #self.setupUi(self)
+        #self.setWindowTitle("数据比对工具")
+        #self.setWindowIcon(QIcon('logo.png'))
 
 if __name__ == '__main__':
     QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
