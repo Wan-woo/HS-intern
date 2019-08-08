@@ -11,6 +11,9 @@
 '''
 import sqlite3
 
+"""
+        检查是否存在sqlite库，没有则创建库
+"""
 def checkSystemDb():
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
@@ -42,6 +45,9 @@ def checkSystemDb():
                 sqlite3Conn.commit()
                 sqlite3Conn.close()
 
+"""
+      获得备份列表
+"""
 def getBackupInfo():
     checkSystemDb()
     sqlite3Conn = sqlite3.connect('test.db')
@@ -50,7 +56,9 @@ def getBackupInfo():
     backInformationList = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return backInformationList
-
+"""
+      获得模块列表
+"""
 
 def getMoudleInfo():
     sqlite3Conn = sqlite3.connect('test.db')
@@ -60,7 +68,9 @@ def getMoudleInfo():
     moudleInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return moudleInfo
-
+"""
+        获取功能指标列表
+"""
 def getFunctionQuotaInfo():
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
