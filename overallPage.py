@@ -81,20 +81,67 @@ class Ui_MainWindow(modelPage.Ui_MainWindow):
             self.reportFrame.setVisible(True)
 
     def setReportFrame(self, checkedId):
-        dataLayout = QVBoxLayout(self.reportFrame)
-        dataLayout.addWidget(QLabel('数据对比'))
+        reportFrameLayout = QVBoxLayout(self.reportFrame)
+        threeReportFrameLayout = QHBoxLayout()
+        threeReportFrameLayout.setSpacing(30)
+        # 创建数据板块Layout
+        dataLayout = QVBoxLayout()
+        dataLayout.setSpacing(10)
+        # 创建一个label
+        dataLabel = QLabel('数据对比')
         # 创建一个数据表格
         dataTable = QTableWidget()
         dataTable.setColumnCount(3)
         dataTable.setRowCount(10)
         # 创建一个查看按钮
         dataConfirmBtn = QPushButton('查看')
-
+        dataConfirmBtn.setFixedHeight(15)
+        dataConfirmBtn.setStyleSheet("QPushButton{margin-left:50px;margin-right:50px;};")
         # 将所有组件添加到其中
+        dataLayout.addWidget(dataLabel, alignment=Qt.AlignCenter)
         dataLayout.addWidget(dataTable)
         dataLayout.addWidget(dataConfirmBtn)
-        self.returnLayout().addWidget(self.reportFrame, 1, 0, 4, 5)
-        pass
+        # 创建视图/存储过程Layout
+        viewprocessLayout = QVBoxLayout()
+        viewprocessLayout.setSpacing(10)
+        viewprocessLabel = QLabel('视图/存储过程对比')
+        viewprocessTable = QTableWidget()
+        viewprocessTable.setColumnCount(3)
+        viewprocessBtn = QPushButton('查看')
+        viewprocessBtn.setStyleSheet("QPushButton{margin-left:50px;margin-right:50px;};")
+        viewprocessBtn.setFixedHeight(15)
+        viewprocessLayout.addWidget(viewprocessLabel, alignment=Qt.AlignCenter)
+        viewprocessLayout.addWidget(viewprocessTable)
+        viewprocessLayout.addWidget(viewprocessBtn)
+        # 创建功能/报表layout
+        funcreportLayout = QVBoxLayout()
+        funcreportLayout.setSpacing(10)
+        funcreportLable = QLabel('功能/报表对比')
+        funcreportTable = QTableWidget()
+        funcreportTable.setColumnCount(3)
+        funcreportBtn = QPushButton('查看')
+        funcreportBtn.setFixedHeight(15)
+        funcreportBtn.setStyleSheet("QPushButton{margin-left:50px;margin-right:50px;};")
+        funcreportLayout.addWidget(funcreportLable, alignment=Qt.AlignCenter)
+        funcreportLayout.addWidget(funcreportTable)
+        funcreportLayout.addWidget(funcreportBtn)
+
+        # 设置一个返回按钮
+        returnBtn = QPushButton('返回')
+        returnBtn.setMinimumWidth(100)
+        returnBtn.clicked.connect(self.returnBtn_clicked)
+        # 上述组件添加进入layout中
+        threeReportFrameLayout.addLayout(dataLayout)
+        threeReportFrameLayout.addLayout(viewprocessLayout)
+        threeReportFrameLayout.addLayout(funcreportLayout)
+        reportFrameLayout.addLayout(threeReportFrameLayout)
+        reportFrameLayout.addWidget(returnBtn, alignment=Qt.AlignRight)
+        self.returnLayout().addWidget(self.reportFrame, 1, 0, 4, 6)
+
+
+    def returnBtn_clicked(self):
+        self.reportFrame.setVisible(False)
+        self.normalFrame.setVisible(True)
 
 
 
