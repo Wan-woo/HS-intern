@@ -11,9 +11,28 @@
 '''
 import cx_Oracle
 
+import globalConn as gC
+
 def connectOracle(userName, passWord, host, serviceName):
     try:
         connection=cx_Oracle.connect(userName, passWord, host + "/" + serviceName)
     except cx_Oracle.DatabaseError as msg:
         return False,msg
-    return True,connection
+    gC._init()
+    gC.set_value('userName', userName)
+    gC.set_value('passWord', passWord)
+    gC.set_value('host', host)
+    gC.set_value('serviceName', serviceName)
+    return True
+
+def getOrcaleConnection():
+    userName = gC.get_value('userName')
+    passWord = gC.get_value('passWord')
+    host = gC.get_value('host')
+    serviceName = gC.get_value('serviceName')
+    try:
+        connection=cx_Oracle.connect(userName, passWord, host + "/" + serviceName)
+        return connection
+    except cx_Oracle.DatabaseError as msg:
+        print(msg)
+        return -1

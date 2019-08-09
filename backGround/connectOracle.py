@@ -6,9 +6,9 @@ import cx_Oracle
 #db = pymysql.connect("192.168.36.244", "root", "mysql", "hsyq")
 
 #db = cx_Oracle.connect('faisdb','faisdb','192.168.36.244:1521/fais')
-#db = cx_Oracle.connect('zwd','123456','127.0.0.1/orcl.hs.handsome.com.cn')
+db = cx_Oracle.connect('zwd','123456','127.0.0.1/orcl.hs.handsome.com.cn')
 #db = cx_Oracle.connect('zwd/123456@orcl')
-db = connection=cx_Oracle.connect("zwd","123456","127.0.0.1/orcl")
+#db = connection=cx_Oracle.connect("zwd","123456","127.0.0.1/orcl")
 # 使用 cursor() 方法创建一个游标对象 cursor
 cursor = db.cursor()
 
