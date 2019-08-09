@@ -28,7 +28,7 @@ class Ui_MainWindow(object):
         self.mainLayout = QGridLayout(mainWidget)
 
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
-        self.mainLayout.setSpacing(10)
+        #self.mainLayout.setSpacing(10)
         self.mainLayout.addWidget(navigationWidgetUp, 0, 0, 1, 6)
         self.mainLayout.addWidget(self.tipsLabel, 1, 1, 4, 5, Qt.AlignCenter)
 

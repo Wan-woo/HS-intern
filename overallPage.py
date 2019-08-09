@@ -18,30 +18,84 @@ class Ui_MainWindow(modelPage.Ui_MainWindow):
         super(Ui_MainWindow, self).__init__()
         self.setupUi(self)
 
+        # 在init方法中，预先生成要用到的组件
+        self.reportFrame = QFrame()
+
+        # 采用设置frame的方法构造页面
+        self.normalFrame = QFrame()
+        self.normalFrame.setStyleSheet("QFrame{border: 0px;};")
+        self.normalFrameLayout = QGridLayout(self.normalFrame)
         # 设置左侧导航条
-        navigationWidget = NavigationWidget.NavigationWidget()
-        navigationWidget.setRowHeight(50)
-        navigationWidget.setItems([u'常规', u'高级', u'管理', u'其它', u'关于'])
+        self.navigationWidget = NavigationWidget.NavigationWidget()
+        self.navigationWidget.setRowHeight(50)
+        self.navigationWidget.setItems([u'常规', u'高级', u'管理', u'其它', u'关于'])
         # 设置多选框
-        backupComboBox = QtWidgets.QComboBox()
-        backupComboBox.setFixedWidth(120)
+        self.backupComboBox = QtWidgets.QComboBox()
+        self.backupComboBox.setFixedWidth(120)
         # 设置一键生成新对比按钮
-        generateButton = QtWidgets.QPushButton('一键生成新对比')
+        self.generateButton = QPushButton('一键生成新对比')
         # 设置查看已有对比的label
-        backupVerLabel = QtWidgets.QLabel('备份版本1.0')
+        self.backupVerLabel = QtWidgets.QLabel('备份版本1.0')
         # 设置查看之前对比的按钮
-        backupVerBtn = QtWidgets.QPushButton('查看之前对比')
+        self.backupVerBtn = QtWidgets.QPushButton('查看之前对比')
+        # 将上述组件加入模板
+        self.normalFrameLayout.addWidget(self.navigationWidget, 0, 0, 4, 1)
+        self.normalFrameLayout.addWidget(self.backupComboBox, 0, 1)
+        self.normalFrameLayout.addWidget(self.generateButton, 0, 2)
+        self.normalFrameLayout.addWidget(self.backupVerLabel, 0, 3)
+        self.normalFrameLayout.addWidget(self.backupVerBtn, 0, 4)
+        self.returnLayout().addWidget(self.normalFrame, 1, 0, 4, 5)
+        # 设置槽函数，显示表格
+        self.generateButton.clicked.connect(self.showTable)
+
+    # 设置函数，按下一键对比按钮，显示表格内容
+    def showTable(self):
         # 设置表格控件
         reportTable = QtWidgets.QTableWidget()
         reportTable.setColumnCount(3)
-        reportTable.setRowCount(10)
-        # 将上述组件添加进入模板中
-        self.returnLayout().addWidget(navigationWidget, 2, 0, 4, 1)
-        self.returnLayout().addWidget(backupComboBox, 1, 1)
-        self.returnLayout().addWidget(generateButton, 1, 2)
-        self.returnLayout().addWidget(backupVerLabel, 1, 3)
-        self.returnLayout().addWidget(backupVerBtn, 1, 4)
-        self.returnLayout().addWidget(reportTable, 2, 1, 2, 3)
+        reportTable.setRowCount(12)
+        reportTable.setColumnWidth(0, 150)
+        reportTable.setColumnWidth(1, 150)
+        reportTable.setColumnWidth(2, 150)
+        # 设置表格控件最后一列为按钮
+        # 创建一个按钮组，将所有按钮加入进去
+        self.confirmBtnGroup = QButtonGroup()
+        for i in range(reportTable.rowCount()):
+            self.confirmBtn = QPushButton('查看')
+            self.confirmBtn.setCheckable(True)
+            self.confirmBtn.setStyleSheet("QPushButton{margin-left:20px;margin-right:20px;};")
+            reportTable.setCellWidget(i, 2, self.confirmBtn)
+            self.confirmBtnGroup.addButton(self.confirmBtn)
+            self.confirmBtnGroup.setId(self.confirmBtn, i)
+        # 为按钮组添加槽函数
+        self.confirmBtnGroup.buttonClicked.connect(self.confirmBtnGroup_clicked)
+        # 将上述组件添加进入frame中
+        self.normalFrameLayout.addWidget(reportTable, 1, 1, 3, 4)
+
+
+    def confirmBtnGroup_clicked(self):
+        print(self.confirmBtnGroup.checkedId())
+        if self.confirmBtnGroup.checkedId() != -1:
+            self.normalFrame.setVisible(False)
+            self.setReportFrame(self.confirmBtnGroup.checkedId())
+            self.reportFrame.setVisible(True)
+
+    def setReportFrame(self, checkedId):
+        dataLayout = QVBoxLayout(self.reportFrame)
+        dataLayout.addWidget(QLabel('数据对比'))
+        # 创建一个数据表格
+        dataTable = QTableWidget()
+        dataTable.setColumnCount(3)
+        dataTable.setRowCount(10)
+        # 创建一个查看按钮
+        dataConfirmBtn = QPushButton('查看')
+
+        # 将所有组件添加到其中
+        dataLayout.addWidget(dataTable)
+        dataLayout.addWidget(dataConfirmBtn)
+        self.returnLayout().addWidget(self.reportFrame, 1, 0, 4, 5)
+        pass
+
 
 
 
