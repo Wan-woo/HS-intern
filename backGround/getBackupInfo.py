@@ -17,7 +17,7 @@ import sqlite3
 def checkSystemDb():
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT * FROM sqlite_master;"
+    sql = "SELECT * FROM sqlite_master"
     sqlite3Cursor.execute(sql)
     system_table_info = sqlite3Cursor.fetchall()
     if (len(system_table_info) == 0):
@@ -52,7 +52,7 @@ def getBackupInfo():
     checkSystemDb()
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sqlite3Cursor.execute("select * from backupInformation;")
+    sqlite3Cursor.execute("select * from backupInformation")
     backInformationList = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return backInformationList
@@ -63,7 +63,7 @@ def getBackupInfo():
 def getMoudleInfo():
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT * FROM moudleList;"
+    sql = "SELECT * FROM moudleList"
     sqlite3Cursor.execute(sql)
     moudleInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
@@ -74,7 +74,7 @@ def getMoudleInfo():
 def getFunctionQuotaInfo():
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT * FROM functionQuotaList;"
+    sql = "SELECT * FROM functionQuotaList"
     sqlite3Cursor.execute(sql)
     FunctionQuotaInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
@@ -89,7 +89,7 @@ def getObjectByModule(moduleName,typeCode):
         print("参数不合法")
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT * FROM moduleObject WHERE type ="+str(typeCode)+"AND modulename = "+moduleName+";"
+    sql = "SELECT * FROM moduleObject WHERE type ="+str(typeCode)+"AND modulename = "+moduleName+""
     sqlite3Cursor.execute(sql)
     objectInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
@@ -103,7 +103,7 @@ def getObjectByModule(FunctionQuotaName,typeCode):
         print("参数不合法")
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT * FROM moduleObject WHERE functionQuotaType ="+str(typeCode)+"AND functionQuotaName = "+FunctionQuotaName+";"
+    sql = "SELECT * FROM moduleObject WHERE functionQuotaType ="+str(typeCode)+"AND functionQuotaName = "+FunctionQuotaName+""
     sqlite3Cursor.execute(sql)
     objectInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
@@ -118,7 +118,7 @@ def getObjectByModule(objectNamePart,typeCode):
         print("参数不合法")
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT * FROM backupObjectNameList WHERE backupVersion ='' AND ObjectType = "+str(typeCode)+"AND objectName LIKE+'%"+objectNamePart+"%';"
+    sql = "SELECT * FROM backupObjectNameList WHERE backupVersion ='' AND ObjectType = "+str(typeCode)+"AND objectName LIKE+'%"+objectNamePart+"%'"
     sqlite3Cursor.execute(sql)
     objectInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
@@ -133,7 +133,7 @@ def getObjectByModule(typeCode):
         print("参数不合法")
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT * FROM backupObjectNameList WHERE backupVersion ='' AND ObjectType = "+str(typeCode)+";"
+    sql = "SELECT * FROM backupObjectNameList WHERE backupVersion ='' AND ObjectType = "+str(typeCode)+""
     sqlite3Cursor.execute(sql)
     objectList = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
