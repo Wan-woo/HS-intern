@@ -19,16 +19,24 @@ import sqlite3
 def insertCurrentContrast(backupVersion,backupTime,beginTime,endTime):
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    # sql = "INSERT INTO backupInformation VALUES(5,'%s',%d,%d,%d,1);"%(backupVersion,backupTime,beginTime,endTime)
-    #sql = 'INSERT INTO backupInformation VALUES(5,"v101",190808,190704,190801,0);'
-    # sql = 'select * from backupInformation'
-    # sql = sql.replace("'","\\'")
-    # sql = 'INSERT INTO backupInformation VALUES(5,"%s","%s","%s","%s",1);' % (backupVersion, backupTime, beginTime, endTime)
-    a=sqlite3Cursor.execute('insert into backupInformation(id,backupVersion,hasContrast) values (5,\'1\',1)')
-    sqlite3Cursor.execute("insert into testzwd values(1,'t')")
-    b = sqlite3Cursor.fetchall()
-    print(a,b)
+    sql = "INSERT INTO backupInformation(backupVersion,backupTime,beginTime,endTime,hasContrast) VALUES('%d',%d,%d,%d,0);"%(backupVersion,backupTime,beginTime,endTime)
+    sqlite3Cursor.execute(sql)
     sqlite3Cursor.close()
+    sqlite3Conn.commit()
     sqlite3Conn.close()
 
-insertCurrentContrast('v101',190808,190704,190801)
+
+
+"""
+      增加新的对应关系
+"""
+def insertCurrentContrast(backupVersion,backupTime,beginTime,endTime):
+    sqlite3Conn = sqlite3.connect('test.db')
+    sqlite3Cursor = sqlite3Conn.cursor()
+    sql = "INSERT INTO backupInformation(backupVersion,backupTime,beginTime,endTime,hasContrast) VALUES('%d',%d,%d,%d,0);"%(backupVersion,backupTime,beginTime,endTime)
+    sqlite3Cursor.execute(sql)
+    sqlite3Cursor.close()
+    sqlite3Conn.commit()
+    sqlite3Conn.close()
+
+insertCurrentContrast(1,190808,190704,190801)

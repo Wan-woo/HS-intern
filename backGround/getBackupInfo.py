@@ -138,3 +138,33 @@ def getObjectByModule(typeCode):
     objectList = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return objectList
+"""
+       获得新的备份版本
+"""
+def getbackupVersionId():
+    sqlite3Conn = sqlite3.connect('test.db')
+    sqlite3Cursor = sqlite3Conn.cursor()
+    askSql = 'SELECT max(backupVersion) from backupInformation'
+    sqlite3Cursor.execute(askSql)
+    versionList = sqlite3Cursor.fetchone()
+    if (versionList == (None,)):
+        backupVersion = 1
+    else:
+        backupVersion = versionList[0] + 1
+    sqlite3Conn.close()
+    return backupVersion
+"""
+       获得新的备份的备份表id起始范围
+"""
+def getbackupObjectId():
+    sqlite3Conn = sqlite3.connect('test.db')
+    sqlite3Cursor = sqlite3Conn.cursor()
+    askSql = 'SELECT max(backupObjectName) from backupObjectNameList'
+    sqlite3Cursor.execute(askSql)
+    version = sqlite3Cursor.fetchone()
+    if (version == (None,)):
+        backupObjectName = 1
+    else:
+        backupObjectName = version + 1
+    sqlite3Conn.close()
+    return backupObjectName
