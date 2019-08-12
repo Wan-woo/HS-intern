@@ -11,13 +11,13 @@
 '''
 import cx_Oracle
 
-import globalConn as gC
+import backGround.globalConn as gC
 
 def connectOracle(userName, passWord, host, serviceName):
     try:
         connection=cx_Oracle.connect(userName, passWord, host + "/" + serviceName)
     except cx_Oracle.DatabaseError as msg:
-        return False,str(msg)
+        return False, str(msg)
     gC._init()
     gC.set_value('userName', userName)
     gC.set_value('passWord', passWord)

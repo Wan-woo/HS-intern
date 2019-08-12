@@ -13,10 +13,10 @@ from PyQt5.QtWidgets import *
 from resource import NavigationWidget, NavigationWidgetUp
 import modelPage
 
-class Ui_MainWindow(modelPage.Ui_MainWindow):
+class OverallPage(modelPage.Ui_MainWindow):
     def __init__(self):
-        super(Ui_MainWindow, self).__init__()
-        self.setupUi(self)
+        super(OverallPage, self).__init__()
+        self.setupUi()
 
         # 在init方法中，预先生成要用到的组件
         self.reportFrame = QFrame()
