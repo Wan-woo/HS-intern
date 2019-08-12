@@ -63,22 +63,23 @@ def getBackupInfo():
 def getMoudleInfo():
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT * FROM moudleList"
+    sql = "SELECT moudleName FROM moudleList"
     sqlite3Cursor.execute(sql)
     moudleInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return moudleInfo
 """
-        获取功能指标列表
+        获取功能列表
 """
 def getFunctionQuotaInfo():
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT * FROM functionQuotaList"
+    sql = "SELECT functionQuotaName,functionQuotaType FROM functionQuotaList"
     sqlite3Cursor.execute(sql)
     FunctionQuotaInfo = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
     return FunctionQuotaInfo
+
 
 """
         通过模块名查询对象
@@ -168,3 +169,8 @@ def getbackupObjectId():
         backupObjectName = version + 1
     sqlite3Conn.close()
     return backupObjectName
+
+print(getFunctionQuotaInfo())
+print(getMoudleInfo())
+print(getBackupInfo())
+

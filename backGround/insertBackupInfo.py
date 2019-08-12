@@ -28,7 +28,7 @@ def insertBackupInformation(backupVersion,backupTime,beginTime,endTime):
 
 
 """
-      增加新的对应关系
+      增加新的对象(表 存储过程)和版本
 """
 def insertBackupObject(backupVersion,objectName,backupObjectName,ObjectType):
     sqlite3Conn = sqlite3.connect('test.db')
