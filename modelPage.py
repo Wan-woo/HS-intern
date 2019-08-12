@@ -58,3 +58,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def connectOtherPages(self, pageList):
         # 连接所有页面 pageList = [overallPage, dataPage, codePage, functionPage, reportFormPage, backupPage, setupPage]
         self.pageList = pageList
+
+    def loadData(self):
+        pass
