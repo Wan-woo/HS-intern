@@ -17,7 +17,7 @@ def connectOracle(userName, passWord, host, serviceName):
     try:
         connection=cx_Oracle.connect(userName, passWord, host + "/" + serviceName)
     except cx_Oracle.DatabaseError as msg:
-        return False,msg
+        return False,str(msg)
     gC._init()
     gC.set_value('userName', userName)
     gC.set_value('passWord', passWord)
@@ -36,3 +36,6 @@ def getOrcaleConnection():
     except cx_Oracle.DatabaseError as msg:
         print(msg)
         return -1
+# 测试语句 第一条正常 第二条报错
+# print(connectOracle('zwd','123456','127.0.0.1','orcl.hs.handsome.com.cn'))
+# print(connectOracle('zwd','123456','127.0.0.1','orcl.hs.handsome.com.cn6'))
