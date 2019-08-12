@@ -16,7 +16,7 @@ import sqlite3
 """
       增加一条新备份信息
 """
-def insertCurrentContrast(backupVersion,backupTime,beginTime,endTime):
+def insertBackupInformation(backupVersion,backupTime,beginTime,endTime):
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
     sql = "INSERT INTO backupInformation(backupVersion,backupTime,beginTime,endTime,hasContrast) VALUES('%d',%d,%d,%d,0);"%(backupVersion,backupTime,beginTime,endTime)
@@ -30,13 +30,13 @@ def insertCurrentContrast(backupVersion,backupTime,beginTime,endTime):
 """
       增加新的对应关系
 """
-def insertCurrentContrast(backupVersion,backupTime,beginTime,endTime):
+def insertBackupObject(backupVersion,objectName,backupObjectName,ObjectType):
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "INSERT INTO backupInformation(backupVersion,backupTime,beginTime,endTime,hasContrast) VALUES('%d',%d,%d,%d,0);"%(backupVersion,backupTime,beginTime,endTime)
+    sql = "INSERT INTO backupObjectNameList(backupVersion,objectName,backupObjectName,ObjectType) VALUES('%s','%s','%s','%s');"%(backupVersion,objectName,backupObjectName,ObjectType)
     sqlite3Cursor.execute(sql)
     sqlite3Cursor.close()
     sqlite3Conn.commit()
     sqlite3Conn.close()
 
-insertCurrentContrast(1,190808,190704,190801)
+insertBackupObject(1,'表1','backup4',1)

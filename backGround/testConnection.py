@@ -37,5 +37,5 @@ def getOrcaleConnection():
         print(msg)
         return -1
 # 测试语句 第一条正常 第二条报错
-# print(connectOracle('zwd','123456','127.0.0.1','orcl.hs.handsome.com.cn'))
-# print(connectOracle('zwd','123456','127.0.0.1','orcl.hs.handsome.com.cn6'))
+# print(connectOracle('faisdb','faisdb','192.168.36.244','fais'))
+# print(connectOracle('faisdb','faisdb','192.168.36.244','fais1'))
