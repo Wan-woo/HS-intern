@@ -166,11 +166,28 @@ def getbackupObjectId():
     if (version == (None,)):
         backupObjectName = 1
     else:
-        backupObjectName = version + 1
+        backupObjectName = int(version[0][6:]) + 1
     sqlite3Conn.close()
     return backupObjectName
 
-print(getFunctionQuotaInfo())
-print(getMoudleInfo())
-print(getBackupInfo())
+"""
+       获得备份的表的主键和备份字段
+"""
+def getbackupFieldKey(tableName):
+    sqlite3Conn = sqlite3.connect('test.db')
+    sqlite3Cursor = sqlite3Conn.cursor()
+    fieldSql = 'SELECT fieldChosed from backupFieldKey where tableName = "%s" '%(tableName)
+    keySql = 'SELECT keyChosed from backupFieldKey where tableName = "%s"'%(tableName)
+    sqlite3Cursor.execute(fieldSql)
+    fieldList = sqlite3Cursor.fetchall()
+    sqlite3Cursor.execute(keySql)
+    key = sqlite3Cursor.fetchone()
+    sqlite3Conn.close()
+    return fieldList,key
 
+# print(getFunctionQuotaInfo())
+# print(getMoudleInfo())
+# print(getBackupInfo())
+# print(getbackupObjectId())
+
+print(str(getbackupFieldKey('表1')[0][0][0]))
