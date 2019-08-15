@@ -35,29 +35,8 @@ def insertBackupObject(backupVersion,objectName,backupObjectName,ObjectType):
     sqlite3Cursor.close()
     sqlite3Conn.commit()
     sqlite3Conn.close()
-"""
-      增加一条新模块信息
-"""
-def insertMoudleList(moudleName):
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "INSERT INTO moudleList(moudleName,isSystemDefineModule) VALUES('%s','%s');"%(moudleName,0)
-    sqlite3Cursor.execute(sql)
-    sqlite3Cursor.close()
-    sqlite3Conn.commit()
-    sqlite3Conn.close()
 
-"""
-      增加一条模块与对象对应关系
-"""
-def insertMoudleObject(moudleName,objectName,objectType,isSystemDefine):
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "INSERT INTO moudleObject(moudleName,objectName,objectType,isSystemDefine) VALUES('%s','%s','%s','%s','%s');"%(moudleName,objectName,objectType,isSystemDefine,0)
-    sqlite3Cursor.execute(sql)
-    sqlite3Cursor.close()
-    sqlite3Conn.commit()
-    sqlite3Conn.close()
+
 
 
 
@@ -72,16 +51,6 @@ def insertContrastResults(backupObjectName,differenceType,primaryKeyId,differenc
     sqlite3Cursor.close()
     sqlite3Conn.commit()
     sqlite3Conn.close()
-"""
-      增加备份的表和应该备份的字段和对比主键
-"""
-def insertBackupFieldKey(objectName,fieldChosed,keyChosed,isSystemDefine,modifier,modificationTime):
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "INSERT INTO backupFieldKey(objectName,fieldChosed,keyChosed,isSystemDefine,modifier,modificationTime) VALUES('%s','%s','%s','%s','%s','%s');"%(objectName,fieldChosed,keyChosed,isSystemDefine,modifier,modificationTime)
-    sqlite3Cursor.execute(sql)
-    sqlite3Cursor.close()
-    sqlite3Conn.commit()
-    sqlite3Conn.close()
+
 
 insertBackupObject(1,'表1','backup4',1)

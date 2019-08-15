@@ -11,6 +11,7 @@
 '''
 import sqlite3
 from getBackupInfo import getbackupObjectId,getbackupFieldKey
+from testConnection import getOrcaleConnection,connectOracle
 """
       增加新的备份
       输入参数：objectList 
@@ -31,22 +32,25 @@ def createBackup(objectList):
     startId = getbackupObjectId()
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
+    oracleConn = getOrcaleConnection()
+    oracleCursor = oracleConn.cursor()
     for list in tableList:
-        fieldList = getbackupFieldKey(list[0])[0]
-        key = fieldList[1]
+        print(getbackupFieldKey(list[0]))
+        fieldList = getbackupFieldKey(list[0])
         fieldList = fieldList[0]
         fieldStr = ''
         for field in fieldList:
             fieldStr+= field[0]+','
         lenthField = len(fieldStr)
-        fieldStr = field[0,lenthField-2]
-        createSql = 'create table backup "%s" as select "%s" from "%s" WHERE time betwend "s%" and "s%"'\
-                    %('backup'+str(startId),fieldStr,list[0],list[1],list[2])
-        sqlite3Conn.execute(createSql)
+        fieldStr = fieldStr[0:lenthField-1]
+        createSql = 'create table  %s as select %s from %s WHERE FDATE between %s and %s'\
+                    %('backup'+str(startId),fieldStr,list[0],list[2],list[3])
+        print(createSql)
+        oracleCursor.execute(createSql)
         startId+=1
 
     sqlite3Conn.close()
-
-lists = [('表1', 1,20190810,20190812), ('表2', 1,20190810,20190812), ('存储过程1', 2,20190810,20190812)]
-createBackup(lists)
+# print(connectOracle('ZWD','123456','127.0.0.1','orcl.hs.handsome.com.cn'))
+# lists = [('S_FA_YSS_GZB', 1,20150409,20150415),]
+# createBackup(lists)
 
