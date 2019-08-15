@@ -46,6 +46,8 @@ class SetupPage(modelPage.Ui_MainWindow):
 
         # 最终数据以字典形式进行返回
         self.returnDict = {}
+        # 详细的表与字段放在另一张表中
+        self.returnTableDict = {}
         # 用于存放暂时配置成功的所有表名
         self.tempTableList = []
         # 用于存放暂时配置成功的表字段信息，使用双重字典
@@ -194,6 +196,8 @@ class SetupPage(modelPage.Ui_MainWindow):
             if item not in field:
                 flag = True
                 field.append(item)
+        reply = QMessageBox.question(self, 'Message',
+                                     "配置成功", QMessageBox.Yes, QMessageBox.Yes)
         # 暂时配置成功，则存储表名和表字段信息
         self.tempTableList.append(self.tableName)
         temp = {}
@@ -203,7 +207,7 @@ class SetupPage(modelPage.Ui_MainWindow):
 
     def submitSetupBtn_clicked(self):
         # 把所有数据写入
-        for item in [[self.processTable, self.processList], [self.viewTable, self.viewList], [self.tableTable, self.tableList]]:
+        for item in [[self.processTable, self.processChooseList], [self.viewTable, self.viewChooseList], [self.tableTable, self.tableChooseList]]:
             table = item[0]
             chooseList = item[1]
             # 如果有上次未读出的item，先读出
@@ -217,19 +221,23 @@ class SetupPage(modelPage.Ui_MainWindow):
                     if item in chooseList:
                         chooseList.remove(item)
         self.returnDict['module'] = self.moduleComboBox.currentText()
-        self.returnDict['function'] = self.functionList
-        self.returnDict['quota'] = self.quotaList
-        self.returnDict['process'] = self.processList
-        self.returnDict['view'] = self.viewList
+        self.returnDict['function'] = self.functionComboBox.getCheckItem()
+        self.returnDict['quota'] = self.quotaComboBox.getCheckItem()
+        self.returnDict['process'] = self.processChooseList
+        self.returnDict['view'] = self.viewChooseList
         # 数据一致比对 查询是否所有选择的表都进行了字段配置，若没有则删除
-        for tableName in self.tableList:
-            if self.tempReturnDict.get(tableName, default=False) == False:
-                self.tableList.remove(tableName)
-        self.returnDict['table'] = self.tableList
-        for tableName in self.tableList:
-            self.returnDict[tableName] = self.tempReturnDict[tableName]
+        for tableName in self.tableChooseList:
+            flag = False
+            for key in self.tempReturnDict.keys():
+                if tableName == key:
+                    flag = True
+            if not flag:
+                self.tableChooseList.remove(tableName)
+        self.returnDict['table'] = self.tableChooseList
+        for tableName in self.tableChooseList:
+            self.returnTableDict[tableName] = self.tempReturnDict[tableName]
         print(self.returnDict)
-        pass
+        print(self.returnTableDict)
 
     def setEditModuleFrame(self):
         # 为frame新建一个Layout
