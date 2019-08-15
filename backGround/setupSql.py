@@ -10,7 +10,7 @@
 @returnParam:
 '''
 import sqlite3
-
+from testConnection import getOrcaleConnection
 
 
 
@@ -19,12 +19,17 @@ import sqlite3
 """
 def tuplesToList(fetchTuples):
     returnList = []
+    if(len(fetchTuples)==0):
+        return
     if(len(fetchTuples[0])==1):
         for subTuple in fetchTuples:
             returnList.append(subTuple[0])
     else:
-        print("输入不为1维")
+        for subTuple in fetchTuples:
+            returnList.append(list(subTuple))
     return returnList
+
+
 
 """
       获得模块列表
@@ -41,16 +46,59 @@ def getMoudleInfo():
     return moudleInfo
 
 """
-      增加一条新模块信息
+      获得当前Oracle中所有表存储过程视图
 """
-def insertMoudleList(moudleName):
+
+def getOracleInfo():
+    oracleConn = getOrcaleConnection()
+    oracleCursor = oracleConn.cursor()
+    oracleCursor.execute("Select object_name From user_objects Where object_type='TABLE' ")
+    tableList = oracleCursor.fetchall()
+    tableList =  tuplesToList(tableList)
+    oracleCursor.execute("Select object_name From user_objects Where object_type='PROCEDURE' ")
+    produceList = oracleCursor.fetchall()
+    produceList =  tuplesToList(produceList)
+    oracleCursor.execute("Select object_name From user_objects Where object_type='VIEW' ")
+    viewList = oracleCursor.fetchall()
+    viewList =  tuplesToList(viewList)
+    return [tableList,produceList,viewList]
+print(getOracleInfo())
+
+"""
+      获得所有配置信息
+"""
+def getSetupList():
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "INSERT INTO moudleList(moudleName,isSystemDefineModule) VALUES('%s','%s');"%(moudleName,0)
-    sqlite3Cursor.execute(sql)
+    moduleObjectSql = "select moduleName,objectName,objectType from moduleObject"
+    print(moduleObjectSql)
+    sqlite3Cursor.execute(moduleObjectSql)
+    moudleObjects =sqlite3Cursor.fetchall()
+    moudleObjects = tuplesToList(moudleObjects)
+    if(len(moudleObjects)==0):
+        return
+    for moduleObject in moudleObjects:
+        functionSql  = "select functionQuotaName from objectFunctionQuota where objectName = '%s' and objectType='%s' and functionQuotaType=1"%(moduleObject[1],moduleObject[2])
+        sqlite3Cursor.execute(functionSql)
+        result=sqlite3Cursor.fetchall()
+        result=tuplesToList(result)
+        moduleObject.append(result)
+        quotaSql  = "select functionQuotaName from objectFunctionQuota where objectName = '%s' and objectType='%s' and functionQuotaType=2"%(moduleObject[1],moduleObject[2])
+        sqlite3Cursor.execute(quotaSql)
+        result=sqlite3Cursor.fetchall()
+        result=tuplesToList(result)
+        moduleObject.append(result)
+        if(moduleObject[2]==1):
+            moduleObject[2]="表"
+        elif(moduleObject[2]==2):
+            moduleObject[2] = "存储过程"
+        elif(moduleObject[2]==3):
+            moduleObject[2]="视图"
+
     sqlite3Cursor.close()
-    sqlite3Conn.commit()
     sqlite3Conn.close()
+    return moudleObjects
+print(getSetupList())
 
 """
       删除一条新模块及配置的信息
@@ -104,8 +152,16 @@ def getbackupFieldKey(tableName):
 
 
 
+# """
+#       接收新增的字典用于新增记录（给前端调用）
+# """
+# def insertMoudleObjects(dicts1,dicts2):
+#     for dict in dicts1:
+#         moduleName = dict.
+
+
 """
-      增加一条模块与对象对应关系
+      增加一条模块与对象对应关系（底层不用来调用）
 """
 def insertMoudleObject(moudleName,objectName,objectType,isSystemDefine):
     sqlite3Conn = sqlite3.connect('test.db')
