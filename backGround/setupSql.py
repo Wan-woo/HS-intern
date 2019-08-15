@@ -19,11 +19,14 @@ import sqlite3
 """
 def tuplesToList(fetchTuples):
     returnList = []
+    if(len(fetchTuples)==0):
+        return
     if(len(fetchTuples[0])==1):
         for subTuple in fetchTuples:
             returnList.append(subTuple[0])
     else:
-        print("输入不为1维")
+        for subTuple in fetchTuples:
+            returnList.append(list(subTuple))
     return returnList
 
 """
@@ -40,17 +43,37 @@ def getMoudleInfo():
     sqlite3Conn.close()
     return moudleInfo
 print(getMoudleInfo())
+
 """
-      增加一条新模块信息
+      获得所有配置信息
 """
-def insertMoudleList(moudleName):
+def getSetupList():
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "INSERT INTO moudleList(moudleName,isSystemDefineModule) VALUES('%s','%s');"%(moudleName,0)
-    sqlite3Cursor.execute(sql)
+    moduleObjectSql = "select moduleName,objectName,objectType from moduleObject"
+    print(moduleObjectSql)
+    sqlite3Cursor.execute(moduleObjectSql)
+    moudleObjects =sqlite3Cursor.fetchall()
+    moudleObjects = tuplesToList(moudleObjects)
+    if(len(moudleObjects)==0):
+        return
+    for moduleObject in moudleObjects:
+        functionSql  = "select functionQuotaName from objectFunctionQuota where objectName = '%s' and objectType='%s' and functionQuotaType=1"%(moduleObject[1],moduleObject[2])
+        sqlite3Cursor.execute(functionSql)
+        result=sqlite3Cursor.fetchall()
+        result=tuplesToList(result)
+        moduleObject.append(result)
+        quotaSql  = "select functionQuotaName from objectFunctionQuota where objectName = '%s' and objectType='%s' and functionQuotaType=2"%(moduleObject[1],moduleObject[2])
+        sqlite3Cursor.execute(quotaSql)
+        result=sqlite3Cursor.fetchall()
+        result=tuplesToList(result)
+        moduleObject.append(result)
+
+
     sqlite3Cursor.close()
-    sqlite3Conn.commit()
     sqlite3Conn.close()
+    return moudleObjects
+print(getSetupList())
 
 """
       删除一条新模块及配置的信息
@@ -105,7 +128,15 @@ def getbackupFieldKey(tableName):
 
 
 """
-      增加一条模块与对象对应关系
+      接收新增的字典用于新增记录（给前端调用）
+"""
+# def insertMoudleObjects(dicts1,dicts2):
+#     for dict in dicts1:
+#         moduleName = dict.
+
+
+"""
+      增加一条模块与对象对应关系（底层不用来调用）
 """
 def insertMoudleObject(moudleName,objectName,objectType,isSystemDefine):
     sqlite3Conn = sqlite3.connect('test.db')
