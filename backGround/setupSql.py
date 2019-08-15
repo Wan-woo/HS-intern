@@ -68,7 +68,12 @@ def getSetupList():
         result=sqlite3Cursor.fetchall()
         result=tuplesToList(result)
         moduleObject.append(result)
-
+        if(moduleObject[2]==1):
+            moduleObject[2]="表"
+        elif(moduleObject[2]==2):
+            moduleObject[2] = "存储过程"
+        elif(moduleObject[2]==3):
+            moduleObject[2]="视图"
 
     sqlite3Cursor.close()
     sqlite3Conn.close()
