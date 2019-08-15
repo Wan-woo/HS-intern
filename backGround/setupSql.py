@@ -3,13 +3,29 @@
 '''
 @author: zwd
 @contact: zwdeng@163.com
-@file: configurationSQL.py
+@file: setupSql.py
 @time: 2019/8/15 10:09
 @function:
 @inputParam:
 @returnParam:
 '''
 import sqlite3
+
+
+
+
+"""
+      处理返回的一维列表
+"""
+def tuplesToList(fetchTuples):
+    returnList = []
+    if(len(fetchTuples[0])==1):
+        for subTuple in fetchTuples:
+            returnList.append(subTuple[0])
+    else:
+        print("输入不为1维")
+    return returnList
+
 """
       获得模块列表
 """
@@ -20,9 +36,10 @@ def getMoudleInfo():
     sql = "SELECT moudleName FROM moudleList"
     sqlite3Cursor.execute(sql)
     moudleInfo = sqlite3Cursor.fetchall()
+    moudleInfo = tuplesToList(moudleInfo)
     sqlite3Conn.close()
     return moudleInfo
-
+print(getMoudleInfo())
 """
       增加一条新模块信息
 """
@@ -53,34 +70,25 @@ def deleteMoudleList(moudleName):
         通过模块名查询对象
     需要输出的对象类型:type 1.表table 2.存储过程stored procedures 3.视图 view 
 """
-def getObjectByModule(moduleName,typeCode):
-    if(typeCode!=1&typeCode!=2&typeCode!=3):
-        print("参数不合法")
+def getObjectByModule(moduleName):
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT * FROM moduleObject WHERE type ="+str(typeCode)+"AND modulename = "+moduleName+""
-    sqlite3Cursor.execute(sql)
-    objectInfo = sqlite3Cursor.fetchall()
+    tableSql = "SELECT objectName FROM moduleObject WHERE type = 1 AND modulename = %s"%(moduleName)
+    storeSql = "SELECT objectName FROM moduleObject WHERE type = 2 AND modulename = %s"%(moduleName)
+    viewSql = "SELECT objectName FROM moduleObject WHERE type = 3 AND modulename = %s"%(moduleName)
+    sqlite3Cursor.execute(tableSql)
+    tableName = sqlite3Cursor.fetchall()
+    sqlite3Cursor.execute(storeSql)
+    storeName = sqlite3Cursor.fetchall()
+    sqlite3Cursor.execute(viewSql)
+    viewName = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
-    return objectInfo
+    return tableName,storeName,viewName
+
+
 
 """
-        通过名称和类型筛选查询对象（名称like进行模糊匹配）
-    需要输出的对象类型:type 1.表table 2.存储过程stored procedures 3.视图 view 
-"""
-def getObjectByMatch(objectNamePart,typeCode):
-    if(typeCode!=1&typeCode!=2&typeCode!=3):
-        print("参数不合法")
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT * FROM backupObjectNameList WHERE backupVersion ='' AND ObjectType = "+str(typeCode)+"AND objectName LIKE+'%"+objectNamePart+"%'"
-    sqlite3Cursor.execute(sql)
-    objectInfo = sqlite3Cursor.fetchall()
-    sqlite3Conn.close()
-    return objectInfo
-
-"""
-       获得备份的表的主键和备份字段
+       获得配置的表的主键和备份字段
 """
 def getbackupFieldKey(tableName):
     sqlite3Conn = sqlite3.connect('test.db')
