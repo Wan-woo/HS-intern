@@ -20,7 +20,6 @@ class NavigationWidget(QWidget):
         self.setMouseTracking(True)
         self.setMinimumWidth(120)
 
-
     def addItem(self, item):
         self.listItems.append(item)
         self.update()

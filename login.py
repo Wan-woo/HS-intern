@@ -4,8 +4,8 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QHeaderView
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtCore
-import loginPage
-import overallPage
+import loginPage, overallPage, setupPage, backupPage, reportFormPage, functionPage, codePage, dataPage
+import backGround.testConnection
 
 class Login(QtWidgets.QMainWindow, loginPage.Ui_MainWindow):
     def __init__(self):
@@ -13,57 +13,57 @@ class Login(QtWidgets.QMainWindow, loginPage.Ui_MainWindow):
         self.setupUi(self)
         self.setWindowTitle("数据比对工具")
         self.setWindowIcon(QIcon('logo.png'))
-
-    def pushButton_click(self):
-        rlist = oracle.connect_test()
-        self.tableWidget.setColumnCount(3)
-        self.tableWidget.setRowCount(len(rlist))
-        i = 0
-        j = 0
-        columnWidth = self.tableWidget.width() / self.tableWidget.columnCount()
-        rowHeight = self.tableWidget.height() / self.tableWidget.rowCount()
-        for row in rlist:
-            self.tableWidget.setItem(i, 0, QTableWidgetItem(str(row[0])))
-            self.tableWidget.setItem(i, 1, QTableWidgetItem(str(row[1])))
-            i += 1
-        #self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
-        #self.tableWidget.horizontalHeader().setCascadingSectionResizes(True)
-        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.tableWidget.verticalHeader().setVisible(True)
-        self.tableWidget.horizontalHeader().setVisible(True)
-
-    def exitButton_click(self):
-        reply = QMessageBox.question(self, 'Message',
-                                     "Are you sure to quit?", QMessageBox.Yes |
-                                     QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
-            quit()
-        else:
-            return
+        self.isConnectionSuccess = False
 
     def testConnectionButton_click(self):
-        dbAddress = self.dbAddressLine.text()
+        host = self.dbAddressLine.text()
         username = self.usernameLine.text()
         servicename = self.servicenameLine.text()
         password = self.passwordLine.text()
-        print(dbAddress+username+servicename+password)
+        flag, msg = backGround.testConnection.connectOracle(username, password, host, servicename)
+        if flag:
+            reply = QMessageBox.question(self, 'Message',
+                                         "连接成功!", QMessageBox.Yes, QMessageBox.Yes)
+            self.isConnectionSuccess = True
+            return
+        else:
+            reply = QMessageBox.question(self, 'Message',
+                                         "连接失败!\n失败原因为:" + msg, QMessageBox.Yes, QMessageBox.Yes)
+            return
 
     def confirmButton_click(self):
-        login.close()
-        overall.show()
+        # 测试时可以关闭
+        if not self.isConnectionSuccess:
+            # 设置pageList
+            pageList = [overallPage, dataPage, codePage, functionPage, reportFormPage, backupPage, setupPage]
+            for page in pageList:
+                page.connectOtherPages(pageList)
+                page.loadData()
 
-class Overall(QtWidgets.QMainWindow, overallPage.Ui_MainWindow):
-    def __init__(self):
-        super(Overall, self).__init__()
-        #self.setupUi(self)
-        #self.setWindowTitle("数据比对工具")
-        #self.setWindowIcon(QIcon('logo.png'))
+            # 首先显示总览界面
+            overallPage.show()
+            login.close()
+        else:
+            reply = QMessageBox.question(self, 'Message',
+                                         "请先通过测试连接", QMessageBox.Yes, QMessageBox.Yes)
+            return
+
+
 
 if __name__ == '__main__':
     QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app = QtWidgets.QApplication(sys.argv)
+    # 由于进程问题，QT不允许两个相同类型的窗体进行跳转
     login = Login()
-    overall = Overall()
     login.show()
+    # 初始化所有页面
+    overallPage = overallPage.OverallPage()
+    dataPage = dataPage.DataPage()
+    codePage = codePage.CodePage()
+    functionPage = functionPage.FunctionPage()
+    reportFormPage = reportFormPage.ReportFormPage()
+    backupPage = backupPage.BackupPage()
+    setupPage = setupPage.SetupPage()
+
     sys.exit(app.exec_())
 

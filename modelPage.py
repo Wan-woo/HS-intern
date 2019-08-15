@@ -12,16 +12,22 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from resource import NavigationWidget, NavigationWidgetUp
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.resize(600, 400)
-        MainWindow.setWindowTitle(u'导航条控件')
+class Ui_MainWindow(QtWidgets.QMainWindow):
+    # 继承初始化，需要将相关的变量在这里初始化
+    def __init__(self):
+        super(Ui_MainWindow, self).__init__()
+        # 使用一个list存储所有的pages，方便之后的切换与连接
+        self.pageList = []
+    def setupUi(self):
+        self.resize(600, 400)
+        self.setWindowTitle(u'导航条控件')
         mainWidget = QWidget()
-        MainWindow.setCentralWidget(mainWidget)
+        self.setCentralWidget(mainWidget)
 
         # 设置上方导航条
         navigationWidgetUp = NavigationWidgetUp.NavigationWidget()
         navigationWidgetUp.setRowHeight(50)
+        navigationWidgetUp.currentItemChanged.connect(self.slotCurrentItemChanged)
 
         self.tipsLabel = QLabel(u"请选择：")
 
@@ -33,11 +39,14 @@ class Ui_MainWindow(object):
         self.mainLayout.addWidget(self.tipsLabel, 1, 1, 4, 5, Qt.AlignCenter)
 
         #self.gridLayout.addWidget(self, navigationWidget)
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.retranslateUi(self)
+        QtCore.QMetaObject.connectSlotsByName(self)
 
     def slotCurrentItemChanged(self, index, content):
-        self.tipsLabel.setText(u"Current index and content：{} ---- {}".format(index, content))
+        print(u"Current index and content：{} ---- {}".format(index, content))
+        self.close()
+        self.pageList[index].show()
+
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -45,3 +54,10 @@ class Ui_MainWindow(object):
 
     def returnLayout(self):
         return self.mainLayout
+
+    def connectOtherPages(self, pageList):
+        # 连接所有页面 pageList = [overallPage, dataPage, codePage, functionPage, reportFormPage, backupPage, setupPage]
+        self.pageList = pageList
+
+    def loadData(self):
+        pass
