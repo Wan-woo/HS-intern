@@ -10,7 +10,7 @@
 @returnParam:
 '''
 import sqlite3
-
+from testConnection import getOrcaleConnection
 
 
 
@@ -29,6 +29,8 @@ def tuplesToList(fetchTuples):
             returnList.append(list(subTuple))
     return returnList
 
+
+
 """
       获得模块列表
 """
@@ -43,6 +45,24 @@ def getMoudleInfo():
     sqlite3Conn.close()
     return moudleInfo
 print(getMoudleInfo())
+"""
+      获得当前Oracle中所有表存储过程视图
+"""
+
+def getOracleInfo():
+    oracleConn = getOrcaleConnection()
+    oracleCursor = oracleConn.cursor()
+    oracleCursor.execute("Select object_name From user_objects Where object_type='TABLE' ")
+    tableList = oracleCursor.fetchall()
+    tableList =  tuplesToList(tableList)
+    oracleCursor.execute("Select object_name From user_objects Where object_type='PROCEDURE' ")
+    produceList = oracleCursor.fetchall()
+    produceList =  tuplesToList(produceList)
+    oracleCursor.execute("Select object_name From user_objects Where object_type='VIEW' ")
+    viewList = oracleCursor.fetchall()
+    viewList =  tuplesToList(viewList)
+    return [tableList,produceList,viewList]
+print(getOracleInfo())
 
 """
       获得所有配置信息
@@ -132,9 +152,9 @@ def getbackupFieldKey(tableName):
 
 
 
-"""
-      接收新增的字典用于新增记录（给前端调用）
-"""
+# """
+#       接收新增的字典用于新增记录（给前端调用）
+# """
 # def insertMoudleObjects(dicts1,dicts2):
 #     for dict in dicts1:
 #         moduleName = dict.

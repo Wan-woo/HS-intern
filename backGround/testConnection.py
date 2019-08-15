@@ -26,6 +26,7 @@ def connectOracle(userName, passWord, host, serviceName):
     return True
 
 def getOrcaleConnection():
+    gC._init()
     userName = gC.get_value('userName')
     passWord = gC.get_value('passWord')
     host = gC.get_value('host')
