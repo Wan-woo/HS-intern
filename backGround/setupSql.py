@@ -39,7 +39,7 @@ def getMoudleInfo():
     moudleInfo = tuplesToList(moudleInfo)
     sqlite3Conn.close()
     return moudleInfo
-print(getMoudleInfo())
+
 """
       增加一条新模块信息
 """
