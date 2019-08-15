@@ -38,10 +38,18 @@ class SetupPage(modelPage.Ui_MainWindow):
 
         # 将frame添加进入Layout中
         self.returnLayout().addWidget(self.setupFrame, 1, 0, 4, 5)
-
+        # 设置tableName为空
+        self.tableName = None
         # 添加槽函数
         self.editModuleBtn.clicked.connect(self.editModuleBtn_clicked)
         self.addBtn.clicked.connect(self.addBtn_clicked)
+
+        # 最终数据以字典形式进行返回
+        self.returnDict = {}
+        # 用于存放暂时配置成功的所有表名
+        self.tempTableList = []
+        # 用于存放暂时配置成功的表字段信息，使用双重字典
+        self.tempReturnDict = {}
 
     def loadData(self):
         # 加载所有需要的数据项
@@ -52,6 +60,10 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.processList = ['C', 'C++', 'Java', 'JavaScript']
         self.viewList = ['C', 'C++', 'Java', 'JavaScript']
         self.tableList = ['C', 'C++', 'Java', 'JavaScript']
+        # 加载被选择列表
+        self.processChooseList = []
+        self.viewChooseList = []
+        self.tableChooseList = []
         self.setupTable.setRowCount(12)
         self.confirmBtnGroup = QButtonGroup()
         for i in range(self.setupTable.rowCount()):
@@ -85,13 +97,138 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.addSetupFrame.setVisible(True)
 
     def processLineEdit_changed(self):
+        # 如果有上次未读出的item，先读出
+        for i in range(self.processTable.rowCount()):
+            checkBox = self.processTable.cellWidget(i, 0)
+            if checkBox.isChecked():
+                item = self.processTable.item(i, 1).text()
+                if item not in self.processChooseList:
+                    self.processChooseList.append(item)
+        # 再次初始化表格
         self.processTable.setColumnCount(2)
+        self.processTable.setRowCount(0)
         input = self.processLineEdit.text()
         i = 0
-        confirmBtnGroup = QButtonGroup()
+        checkBoxList = []
         for item in self.processList:
-            if item.startswith(input):
-                pass
+            if item.startswith(str(input)):
+                self.processTable.insertRow(i)
+                checkBoxList.append(QCheckBox())
+                self.processTable.setCellWidget(i, 0, checkBoxList[i])
+                self.processTable.setItem(i, 1, QTableWidgetItem(item))
+                if item in self.processChooseList:
+                    checkBoxList[i].toggle()
+                i += 1
+
+    def lineEdit_changed(self, table, lineEdit, list, chooseList):
+        # 如果有上次未读出的item，先读出
+        for i in range(table.rowCount()):
+            checkBox = table.cellWidget(i, 0)
+            item = table.item(i, 1).text()
+            if checkBox.isChecked():
+                if item not in chooseList:
+                    chooseList.append(item)
+            else:
+                if item in chooseList:
+                    chooseList.remove(item)
+        # 再次初始化表格
+        table.setColumnCount(2)
+        table.setRowCount(0)
+        input = lineEdit.text()
+        i = 0
+        checkBoxList = []
+        for item in list:
+            if item.startswith(str(input)):
+                table.insertRow(i)
+                checkBoxList.append(QCheckBox())
+                table.setCellWidget(i, 0, checkBoxList[i])
+                table.setItem(i, 1, QTableWidgetItem(item))
+                if item in chooseList:
+                    checkBoxList[i].toggle()
+                i += 1
+        if table == self.tableTable:
+            table.setColumnCount(3)
+            while i >= 0:
+                table.setItem(i, 2, QTableWidgetItem('点击配置'))
+                i -= 1
+
+    def tableItem_clicked(self, row, column):
+        if column == 2:
+            # 获取该表的字段信息
+            keyField = [['1', 'id', 'int']]
+            self.tableName = self.tableTable.item(row, 1).text()
+            self.fieldkeyTable.setColumnCount(5)
+            self.fieldkeyTable.setRowCount(0)
+            # 添加两组checkBox
+            isBackupCheckBox = []
+            isKeyCheckBox = []
+            i = 0
+            for item in keyField:
+                self.fieldkeyTable.insertRow(i)
+                self.fieldkeyTable.setItem(i, 0, QTableWidgetItem(item[0]))
+                self.fieldkeyTable.setItem(i, 1, QTableWidgetItem(item[1]))
+                self.fieldkeyTable.setItem(i, 2, QTableWidgetItem(item[2]))
+                isBackupCheckBox.append(QCheckBox())
+                isKeyCheckBox.append(QCheckBox())
+                self.fieldkeyTable.setCellWidget(i, 3, isBackupCheckBox[i])
+                self.fieldkeyTable.setCellWidget(i, 4, isKeyCheckBox[i])
+                i += 1
+
+    def fieldKeyBtn_clicked(self):
+        if self.tableName == None:
+            return
+        # 首先遍历这张表，收集所有的备份字段和主键
+        field = []
+        key = []
+        for i in range(self.fieldkeyTable.rowCount()):
+            if self.fieldkeyTable.cellWidget(i, 3).isChecked():
+                field.append(self.fieldkeyTable.item(i, 1).text())
+            if self.fieldkeyTable.cellWidget(i, 4).isChecked():
+                key.append(self.fieldkeyTable.item(i, 1).text())
+        if len(field) == 0 or len(key) == 0:
+            reply = QMessageBox.question(self, 'Message',
+                                         "备份与主键字段应多于一个", QMessageBox.Yes, QMessageBox.Yes)
+            return
+        flag = False
+        for item in key:
+            if item not in field:
+                flag = True
+                field.append(item)
+        # 暂时配置成功，则存储表名和表字段信息
+        self.tempTableList.append(self.tableName)
+        temp = {}
+        temp['key'] = key
+        temp['field'] = field
+        self.tempReturnDict[self.tableName] = temp
+
+    def submitSetupBtn_clicked(self):
+        # 把所有数据写入
+        for item in [[self.processTable, self.processList], [self.viewTable, self.viewList], [self.tableTable, self.tableList]]:
+            table = item[0]
+            chooseList = item[1]
+            # 如果有上次未读出的item，先读出
+            for i in range(table.rowCount()):
+                checkBox = table.cellWidget(i, 0)
+                item = table.item(i, 1).text()
+                if checkBox.isChecked():
+                    if item not in chooseList:
+                        chooseList.append(item)
+                else:
+                    if item in chooseList:
+                        chooseList.remove(item)
+        self.returnDict['module'] = self.moduleComboBox.currentText()
+        self.returnDict['function'] = self.functionList
+        self.returnDict['quota'] = self.quotaList
+        self.returnDict['process'] = self.processList
+        self.returnDict['view'] = self.viewList
+        # 数据一致比对 查询是否所有选择的表都进行了字段配置，若没有则删除
+        for tableName in self.tableList:
+            if self.tempReturnDict.get(tableName, default=False) == False:
+                self.tableList.remove(tableName)
+        self.returnDict['table'] = self.tableList
+        for tableName in self.tableList:
+            self.returnDict[tableName] = self.tempReturnDict[tableName]
+        print(self.returnDict)
         pass
 
     def setEditModuleFrame(self):
@@ -142,8 +279,12 @@ class SetupPage(modelPage.Ui_MainWindow):
 
     def setAddSetupFrame(self):
         self.addSetupLayout = QGridLayout(self.addSetupFrame)
+        # 增加页面返回按钮
         self.returnBtn2 = QPushButton('返回')
         self.returnBtn2.clicked.connect(self.returnBtn2_clicked)
+        # 增加确认配置按钮
+        self.submitSetupBtn =  QPushButton('提交配置')
+        self.submitSetupBtn.clicked.connect(self.submitSetupBtn_clicked)
         self.moduleLable = QLabel('请选择模块')
         # 模块下拉选框
         self.moduleComboBox = QComboBox()
@@ -160,19 +301,34 @@ class SetupPage(modelPage.Ui_MainWindow):
         # 存储过程输入框
         self.processLineEdit = QLineEdit()
         # 文本改变时触发事件
-        self.processLineEdit.textChanged.connect(self.processLineEdit_changed)
+        self.processLineEdit.textChanged.connect(lambda: self.lineEdit_changed(self.processTable, self.processLineEdit, self.processList, self.processChooseList))
         # 存储过程表格
         self.processTable = QTableWidget()
         self.viewLable = QLabel('请输入视图')
         # 视图输入框
         self.viewLineEdit = QLineEdit()
+        # 文本改变时触发时间
+        self.viewLineEdit.textChanged.connect(lambda: self.lineEdit_changed(self.viewTable, self.viewLineEdit, self.viewList, self.viewChooseList))
         # 视图表格
         self.viewTable = QTableWidget()
-        self.tableLable = QLabel('请输入表格名')
+        self.tableLable = QLabel('请输入表格名(先勾选，再点击配置)')
         # 查询表格输入框
         self.tableLine = QLineEdit()
+        self.tableLine.textChanged.connect(lambda: self.lineEdit_changed(self.tableTable, self.tableLine, self.tableList, self.tableChooseList))
         # 查询表格的表格
         self.tableTable = QTableWidget()
+        # 设置表格的选择模式为一整行
+        self.tableTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+        # 为表格添加事件响应
+        self.tableTable.cellClicked.connect(self.tableItem_clicked)
+        # 选择表的字段和主键
+        self.fieldkeyLable = QLabel('请选择该表的字段和主键')
+        self.fieldkeyTable = QTableWidget()
+        self.fieldkeyTable.setHorizontalHeaderLabels(['序号', '字段名', '字段类型', '是否备份', '主键选择'])
+        # 增加一个确认配置的按钮
+        self.fieldKeyBtn = QPushButton('确认该配置')
+        # 为确认配置按钮添加槽函数
+        self.fieldKeyBtn.clicked.connect(self.fieldKeyBtn_clicked)
         self.addSetupLayout.addWidget(self.moduleLable, 0, 0, 1, 1, alignment=Qt.AlignRight)
         self.addSetupLayout.addWidget(self.moduleComboBox, 0, 1, 1, 2)
         self.addSetupLayout.addWidget(self.functionLable, 1, 0, 1, 1, alignment=Qt.AlignRight)
@@ -185,8 +341,12 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.addSetupLayout.addWidget(self.viewLineEdit, 2, 3, 1, 1)
         self.addSetupLayout.addWidget(self.processTable, 3, 0, 1, 2)
         self.addSetupLayout.addWidget(self.viewTable, 3, 2, 1, 2)
-        self.addSetupLayout.addWidget(self.tableLable, 4, 0, 1, 1, alignment=Qt.AlignRight)
+        self.addSetupLayout.addWidget(self.tableLable, 4, 0, 1, 1)
         self.addSetupLayout.addWidget(self.tableLine, 4, 1, 1, 1)
         self.addSetupLayout.addWidget(self.tableTable, 5, 0, 1, 2)
+        self.addSetupLayout.addWidget(self.fieldkeyLable, 4, 2, 1, 1)
+        self.addSetupLayout.addWidget(self.fieldKeyBtn, 4, 3, 1, 1)
+        self.addSetupLayout.addWidget(self.fieldkeyTable, 5, 2, 1, 2)
+        self.addSetupLayout.addWidget(self.submitSetupBtn, 6, 2, 1, 1)
         self.addSetupLayout.addWidget(self.returnBtn2, 6, 3, 1, 1)
         self.returnLayout().addWidget(self.addSetupFrame, 1, 0, 5, 5)
