@@ -87,7 +87,14 @@ def getOracleInfo():
     oracleCursor.execute("Select object_name From user_objects Where object_type='VIEW' ")
     viewList = oracleCursor.fetchall()
     viewList =  tuplesToList(viewList)
-    return [tableList,produceList,viewList]
+    fieldDicts={}
+    for table in tableList:
+        fieldSql = "select COLUMN_NAME from USER_COL_COMMENTS where table_name = '%s'"%(table)
+        oracleCursor.execute(fieldSql)
+        fieldList = oracleCursor.fetchall()
+        fieldList = tuplesToList(fieldList)
+        fieldDicts[table]=fieldList
+    return [tableList,produceList,viewList,fieldDicts]
 print(getOracleInfo())
 
 """
