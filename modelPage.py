@@ -19,7 +19,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # 使用一个list存储所有的pages，方便之后的切换与连接
         self.pageList = []
     def setupUi(self):
-        self.resize(600, 400)
+        self.resize(600, 480)
         self.setWindowTitle(u'导航条控件')
         mainWidget = QWidget()
         self.setCentralWidget(mainWidget)
@@ -45,6 +45,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def slotCurrentItemChanged(self, index, content):
         print(u"Current index and content：{} ---- {}".format(index, content))
         self.close()
+        #self.pageList[index].loadData()
+        self.update()
         self.pageList[index].show()
 
 

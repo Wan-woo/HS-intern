@@ -2,7 +2,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from resource import CheckableComboBox
-import modelPage, backGround.setupSql
+import modelPage
+from backGround.setupSql import *
 
 class SetupPage(modelPage.Ui_MainWindow):
     def __init__(self):
@@ -22,8 +23,8 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.chooseComboBox = QComboBox()
         self.editModuleBtn = QPushButton('模块编辑')
         self.setupTable = QTableWidget()
-        self.setupTable.setColumnCount(7)
-        self.setupTable.setHorizontalHeaderLabels([' ', '序号', '模块名', '名称', '类型', '影响功能', '影响指标'])
+        self.setupTable.setColumnCount(6)
+        self.setupTable.setHorizontalHeaderLabels([' ', '模块名', '类型', '名称', '影响功能', '影响指标'])
 
         # 将以上组件添加进入Layout当中
         self.buttonLayout.addWidget(self.addBtn)
@@ -56,21 +57,36 @@ class SetupPage(modelPage.Ui_MainWindow):
     def loadData(self):
         # 加载所有需要的数据项
         # 加载匹配项
-        self.functionList = ['C', 'C++', 'Java', 'JavaScript']
-        self.quotaList = ['C', 'C++', 'Java', 'JavaScript']
-        self.moduleList = ['模块一', '模块二', '模块三', '模块四']
-        self.processList = ['C', 'C++', 'Java', 'JavaScript']
-        self.viewList = ['C', 'C++', 'Java', 'JavaScript']
-        self.tableList = ['C', 'C++', 'Java', 'JavaScript']
+        self.functionList = getFunctionQuotaInfo()[0]
+        self.quotaList = getFunctionQuotaInfo()[1]
+        self.moduleList = getMoudleInfo()
+        self.tableList = getOracleInfo()[0]
+        self.processList = getOracleInfo()[1]
+        self.viewList = getOracleInfo()[2]
+        self.fieldTableDict = getOracleInfo()[3]
+        self.setupList = getSetupList()
+        # 加载
+        self.chooseComboBox.addItems(getMoudleInfo())
         # 加载被选择列表
         self.processChooseList = []
         self.viewChooseList = []
         self.tableChooseList = []
-        self.setupTable.setRowCount(12)
+        self.setupTable.setRowCount(len(self.setupList))
         self.confirmBtnGroup = QButtonGroup()
         for i in range(self.setupTable.rowCount()):
             self.confirmBtn = QRadioButton()
             self.setupTable.setCellWidget(i, 0, self.confirmBtn)
+            self.setupTable.setItem(i, 1, QTableWidgetItem(self.setupList[i][0]))
+            self.setupTable.setItem(i, 2, QTableWidgetItem(self.setupList[i][1]))
+            self.setupTable.setItem(i, 3, QTableWidgetItem(self.setupList[i][2]))
+            if self.setupList[i][3] == None:
+                self.setupTable.setItem(i, 4, QTableWidgetItem('None'))
+            else:
+                self.setupTable.setItem(i, 4, QTableWidgetItem(','.join(self.setupList[i][3])))
+            if self.setupList[i][4] == None:
+                self.setupTable.setItem(i, 5, QTableWidgetItem('None'))
+            else:
+                self.setupTable.setItem(i, 5, QTableWidgetItem(','.join(self.setupList[i][4])))
             self.confirmBtnGroup.addButton(self.confirmBtn)
             self.confirmBtnGroup.setId(self.confirmBtn, i)
         # 为按钮组添加槽函数
@@ -91,6 +107,7 @@ class SetupPage(modelPage.Ui_MainWindow):
 
     def returnBtn2_clicked(self):
         self.addSetupFrame.setVisible(False)
+        self.loadData()
         self.setupFrame.setVisible(True)
 
     def addBtn_clicked(self):
@@ -159,17 +176,19 @@ class SetupPage(modelPage.Ui_MainWindow):
             # 获取该表的字段信息
             keyField = [['1', 'id', 'int']]
             self.tableName = self.tableTable.item(row, 1).text()
+            fieldList = self.fieldTableDict[self.tableName]
             self.fieldkeyTable.setColumnCount(5)
             self.fieldkeyTable.setRowCount(0)
+            self.fieldkeyTable.setHorizontalHeaderLabels(['序号', '字段名', '字段类型', '是否备份', '主键选择'])
             # 添加两组checkBox
             isBackupCheckBox = []
             isKeyCheckBox = []
             i = 0
-            for item in keyField:
+            for item in fieldList:
                 self.fieldkeyTable.insertRow(i)
-                self.fieldkeyTable.setItem(i, 0, QTableWidgetItem(item[0]))
-                self.fieldkeyTable.setItem(i, 1, QTableWidgetItem(item[1]))
-                self.fieldkeyTable.setItem(i, 2, QTableWidgetItem(item[2]))
+                self.fieldkeyTable.setItem(i, 0, QTableWidgetItem(str(i + 1)))
+                self.fieldkeyTable.setItem(i, 1, QTableWidgetItem(item))
+                self.fieldkeyTable.setItem(i, 2, QTableWidgetItem('int'))
                 isBackupCheckBox.append(QCheckBox())
                 isKeyCheckBox.append(QCheckBox())
                 self.fieldkeyTable.setCellWidget(i, 3, isBackupCheckBox[i])
@@ -238,6 +257,7 @@ class SetupPage(modelPage.Ui_MainWindow):
             self.returnTableDict[tableName] = self.tempReturnDict[tableName]
         print(self.returnDict)
         print(self.returnTableDict)
+        insertMoudleObjectsField(self.returnDict, self.returnTableDict)
 
     def setEditModuleFrame(self):
         # 为frame新建一个Layout
@@ -270,6 +290,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.delModuleLineLayout = QHBoxLayout()
         self.delModuleLineLable = QLabel('请选择删除模块名')
         self.delModuleLineText = QComboBox()
+        self.delModuleLineText.addItems(self.moduleList)
         self.delModuleLineText.setFixedWidth(150)
         self.delModuleLineLayout.addWidget(self.delModuleLineLable)
         self.delModuleLineLayout.addWidget(self.delModuleLineText)
@@ -332,7 +353,6 @@ class SetupPage(modelPage.Ui_MainWindow):
         # 选择表的字段和主键
         self.fieldkeyLable = QLabel('请选择该表的字段和主键')
         self.fieldkeyTable = QTableWidget()
-        self.fieldkeyTable.setHorizontalHeaderLabels(['序号', '字段名', '字段类型', '是否备份', '主键选择'])
         # 增加一个确认配置的按钮
         self.fieldKeyBtn = QPushButton('确认该配置')
         # 为确认配置按钮添加槽函数
