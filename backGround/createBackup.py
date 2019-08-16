@@ -10,7 +10,8 @@
 @returnParam:
 '''
 import sqlite3
-from getBackupInfo import getbackupObjectId,getbackupFieldKey
+from setupSql import getbackupFieldKey
+from backupSql import getbackupObjectId
 from testConnection import getOrcaleConnection,connectOracle
 """
       增加新的备份

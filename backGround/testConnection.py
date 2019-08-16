@@ -10,7 +10,7 @@
 @returnParam 状态值+错误对象或连接对象
 '''
 import cx_Oracle
-
+import sqlite3
 import backGround.globalConn as gC
 
 def connectOracle(userName, passWord, host, serviceName):
@@ -33,6 +33,14 @@ def getOrcaleConnection():
     serviceName = gC.get_value('serviceName')
     try:
         connection=cx_Oracle.connect(userName, passWord, host + "/" + serviceName)
+        return connection
+    except cx_Oracle.DatabaseError as msg:
+        print(msg)
+        return -1
+def getSqliteConnection():
+
+    try:
+        connection=sqlite3.connect("test.db")
         return connection
     except cx_Oracle.DatabaseError as msg:
         print(msg)

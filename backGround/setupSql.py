@@ -10,7 +10,7 @@
 @returnParam:
 '''
 import sqlite3
-from testConnection import getOrcaleConnection
+from testConnection import getOrcaleConnection,getSqliteConnection
 
 
 
@@ -45,6 +45,16 @@ def getMoudleInfo():
     sqlite3Conn.close()
     return moudleInfo
 print(getMoudleInfo())
+
+"""
+      增加一个新模块
+"""
+def insertModuleList(moduleName):
+    sqlite3Conn = getSqliteConnection()
+    sql = "INSERT INTO ModuleList(moduleName,isSystemDefineModule) VALUES('%d',0);"%(moduleName)
+    sqlite3Conn.execute(sql)
+    sqlite3Conn.commit()
+    sqlite3Conn.close()
 """
       获得当前Oracle中所有表存储过程视图
 """
@@ -101,7 +111,7 @@ def getSetupList():
 print(getSetupList())
 
 """
-      删除一条新模块及配置的信息
+      删除一个模块及关于此模块的配置的信息
 """
 def deleteMoudleList(moudleName):
     sqlite3Conn = sqlite3.connect('test.db')
@@ -110,6 +120,26 @@ def deleteMoudleList(moudleName):
     modulesql = "delete from moudleList where moduleName = %s and isSystemDefine = 0 "%(moudleName)
     sqlite3Cursor.execute(moduleObjectsql)
     sqlite3Cursor.execute(modulesql)
+    sqlite3Cursor.close()
+    sqlite3Conn.commit()
+    sqlite3Conn.close()
+"""
+      删除一条配置信息
+"""
+def deleteMoudleList(setupList):
+    sqlite3Conn = sqlite3.connect('test.db')
+    sqlite3Cursor = sqlite3Conn.cursor()
+    for setup in setupList:
+        if (setup[2] == '表'):
+            setup[2] = 1
+        elif (setup[2] == "存储过程"):
+            setup[2] = 2
+        elif (setup[2] == "视图"):
+            setup[2] = 3
+        moduleObjectsql = "delete from moudleObject where moduleName = '%s' and objectName='%s'" \
+                          " and objectName='%d' and isSystemDefine = 0 "%(setup[0],setup[1],setup[2])
+
+    sqlite3Cursor.execute(moduleObjectsql)
     sqlite3Cursor.close()
     sqlite3Conn.commit()
     sqlite3Conn.close()
@@ -153,33 +183,51 @@ def getbackupFieldKey(tableName):
 
 
 # """
-#       接收新增的字典用于新增记录（给前端调用）
+#       接收新增的字典用于新增配置记录（给前端调用）
 # """
-# def insertMoudleObjects(dicts1,dicts2):
-#     for dict in dicts1:
-#         moduleName = dict.
+def insertMoudleObjectsField(dicts1,dicts2):
+    moudleName = dicts1.get('module')
+    functionList = dicts1.get('function')
+    quotaList = dicts1.get('quota')
+    tableList = dicts1.get('table')
+    processList = dicts1.get('process')
+    viewList = dicts1.get('view')
+    sqliteConn = getSqliteConnection()
+    """"
+        新增配置关系
+    """
+    if len(tableList)!=0:
+        for objectName in tableList:
+            tableSql = "insert into moduleObject (moudleName,objectName,objectType,isSystemDefine) values ('%s','%s',1,0)"%(moudleName,objectName)
+            sqliteConn.execute(tableSql)
+    if len(processList)!=0:
+        for objectName in processList:
+            processSql = "insert into moduleObject (moudleName,objectName,objectType,isSystemDefine) values ('%s','%s',1,0)"%(moudleName,objectName)
+            sqliteConn.execute(processSql)
+    if len(viewList)!=0:
+        for objectName in viewList:
+            viewSql = "insert into moduleObject (moudleName,objectName,objectType,isSystemDefine) values ('%s','%s',1,0)"%(moudleName,objectName)
+            sqliteConn.execute(viewSql)
+    """
+        新增备份字段与对比主键 
+    """
+    for table in tableList:
+        backupFileds =dicts2.get(table).get('field')
+        keyFields = dicts2.get(table).get('key')
+        for backupFiled in backupFileds:
+            fieldSql = "insert into backupFieldKey (tableName,fieldChosed,fieldType,isSystemDefine) values " \
+                       "('%s','%s',1,0)"%(table,backupFiled)
+            sqliteConn.execute(fieldSql)
+        for backupFiled in keyFields:
+            keySql = "insert into backupFieldKey (tableName,fieldChosed,fieldType,isSystemDefine) values " \
+                       "('%s','%s',2,0)"%(table,backupFiled)
+            sqliteConn.execute(keySql)
 
 
-"""
-      增加一条模块与对象对应关系（底层不用来调用）
-"""
-def insertMoudleObject(moudleName,objectName,objectType,isSystemDefine):
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "INSERT INTO moudleObject(moudleName,objectName,objectType,isSystemDefine) VALUES('%s','%s','%s','%s','%s');"%(moudleName,objectName,objectType,isSystemDefine,0)
-    sqlite3Cursor.execute(sql)
-    sqlite3Cursor.close()
-    sqlite3Conn.commit()
-    sqlite3Conn.close()
 
-"""
-      增加备份的表和应该备份的字段和对比主键
-"""
-def insertBackupFieldKey(objectName,fieldChosed,keyChosed,isSystemDefine,modifier,modificationTime):
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "INSERT INTO backupFieldKey(objectName,fieldChosed,keyChosed,isSystemDefine,modifier,modificationTime) VALUES('%s','%s','%s','%s','%s','%s');"%(objectName,fieldChosed,keyChosed,isSystemDefine,modifier,modificationTime)
-    sqlite3Cursor.execute(sql)
-    sqlite3Cursor.close()
-    sqlite3Conn.commit()
-    sqlite3Conn.close()
+
+returnDict = {'module': '模块一', 'function': ['C', 'C++'], 'quota': ['Java', 'JavaScript'], 'process': ['C'], 'view': ['JavaScript'], 'table': ['JavaScript']}
+returnTableDict = {'JavaScript': {'key': ['id'], 'field': ['id']}}
+
+
+
