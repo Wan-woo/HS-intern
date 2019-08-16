@@ -161,10 +161,15 @@ class BackupPage(modelPage.Ui_MainWindow):
             for i in range(len(List)):
                 table.setCellWidget(i, 0, QCheckBox())
                 table.setItem(i, 1, QTableWidgetItem(List[i]))
+
+        # 设置一个返回按钮
+        self.returnBtn = QPushButton('返回')
+        self.returnBtn.clicked.connect(self.returnBtn_clicked)
         # 将组件加入layout中
         self.createBackupLayout.addWidget(self.navigationWidget, 0, 0, 4, 1)
-        self.createBackupLayout.addLayout(self.calendarLayout, 0, 1, 1, 4)
-        self.createBackupLayout.addLayout(self.tableLayout, 1, 1, 3, 4)
+        self.createBackupLayout.addLayout(self.calendarLayout, 0, 1, 1, 5)
+        self.createBackupLayout.addLayout(self.tableLayout, 1, 1, 3, 5)
+        self.createBackupLayout.addWidget(self.returnBtn, 4, 5, 1, 1)
         # 将frame加入到layout当中
         self.returnLayout().addWidget(self.createBackupFrame, 1, 0, 4, 5)
 
@@ -172,4 +177,8 @@ class BackupPage(modelPage.Ui_MainWindow):
         self.checkBackupFrame.setVisible(False)
         self.setCreateBackupFrame()
         self.createBackupFrame.setVisible(True)
+
+    def returnBtn_clicked(self):
+        self.createBackupFrame.setVisible(False)
+        self.checkBackupFrame.setVisible(True)
 
