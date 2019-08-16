@@ -10,8 +10,9 @@
 @returnParam:
 '''
 import sqlite3
-from getBackupInfo import getbackupObjectId,getbackupFieldKey
-from testConnection import getOrcaleConnection,connectOracle
+from backGround.setupSql import getbackupFieldKey
+from backGround.backupSql import getbackupObjectId
+from backGround.testConnection import getOrcaleConnection,connectOracle
 """
       增加新的备份
       输入参数：objectList 

@@ -9,7 +9,7 @@
 @inputParam:
 @returnParam:
 '''
-from getBackupInfo import getBackupTime,getObjectByVersion
+from backGround.backupSql import getBackupTime,getObjectByVersion
 def makeContrasr(backupVersion):
     [startTime,endTime]=getBackupTime(backupVersion)
     objectList = getObjectByVersion(backupVersion)

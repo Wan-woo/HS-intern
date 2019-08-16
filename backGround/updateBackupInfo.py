@@ -23,6 +23,7 @@ def updateCurrentContrast(backupVersion):
     sql = "UPDATE backupInformation SET hasContrast == 0 where backupVersion = "+backupVersion+";"
     sqlite3Cursor.execute(sql)
     sqlite3Conn.close()
+print(updateCurrentContrast(1))
 """
       获得当前对比的备份
 """
