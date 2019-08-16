@@ -16,17 +16,7 @@ import sqlite3
 
 # print(getBackupTime('1'))
 
-"""
-        获取功能列表
-"""
-def getFunctionQuotaInfo():
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT functionQuotaName,functionQuotaType FROM functionQuotaList"
-    sqlite3Cursor.execute(sql)
-    FunctionQuotaInfo = sqlite3Cursor.fetchall()
-    sqlite3Conn.close()
-    return FunctionQuotaInfo
+
 
 
 

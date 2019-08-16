@@ -10,7 +10,7 @@
 @returnParam:
 '''
 import sqlite3
-from testConnection import getOrcaleConnection,getSqliteConnection
+from backGround.testConnection import getOrcaleConnection,getSqliteConnection
 
 
 
@@ -30,6 +30,22 @@ def tuplesToList(fetchTuples):
     return returnList
 
 
+"""
+        获取功能指标列表
+"""
+def getFunctionQuotaInfo():
+    sqlite3Conn = sqlite3.connect('test.db')
+    sqlite3Cursor = sqlite3Conn.cursor()
+    functionSql = "SELECT functionQuotaName FROM functionQuotaList where functionQuotaType=1"
+    quotaSql = "SELECT functionQuotaName FROM functionQuotaList where functionQuotaType=2"
+    sqlite3Cursor.execute(functionSql)
+    functionList = sqlite3Cursor.fetchall()
+    functionList = tuplesToList(functionList)
+    sqlite3Cursor.execute(quotaSql)
+    quotaList = sqlite3Cursor.fetchall()
+    quotaList = tuplesToList(quotaList)
+    sqlite3Conn.close()
+    return functionList,quotaList
 
 """
       获得模块列表
