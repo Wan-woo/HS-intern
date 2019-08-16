@@ -209,7 +209,7 @@ def getbackupFieldKey(tableName):
 #       接收新增的字典用于新增配置记录（给前端调用）
 # """
 def insertMoudleObjectsField(dicts1,dicts2):
-    moudleName = dicts1.get('module')
+    moduleName = dicts1.get('module')
     functionList = dicts1.get('function')
     quotaList = dicts1.get('quota')
     tableList = dicts1.get('table')
@@ -221,36 +221,51 @@ def insertMoudleObjectsField(dicts1,dicts2):
     """
     if len(tableList)!=0:
         for objectName in tableList:
-            tableSql = "insert into moduleObject (moudleName,objectName,objectType,isSystemDefine) values ('%s','%s',1,0)"%(moudleName,objectName)
-            sqliteConn.execute(tableSql)
+            tableSql = "insert into moduleObject (moduleName,objectName,objectType,isSystemDefine) values ('%s','%s',1,0)"%(moduleName,objectName)
+            try:
+                sqliteConn.execute(tableSql)
+            except Exception as e:
+                print(e)
     if len(processList)!=0:
         for objectName in processList:
-            processSql = "insert into moduleObject (moudleName,objectName,objectType,isSystemDefine) values ('%s','%s',1,0)"%(moudleName,objectName)
+            processSql = "insert into moduleObject (moduleName,objectName,objectType,isSystemDefine) values ('%s','%s',1,0)"%(moduleName,objectName)
             sqliteConn.execute(processSql)
     if len(viewList)!=0:
         for objectName in viewList:
-            viewSql = "insert into moduleObject (moudleName,objectName,objectType,isSystemDefine) values ('%s','%s',1,0)"%(moudleName,objectName)
+            viewSql = "insert into moduleObject (moduleName,objectName,objectType,isSystemDefine) values ('%s','%s',1,0)"%(moduleName,objectName)
             sqliteConn.execute(viewSql)
+
     """
         新增备份字段与对比主键 
     """
     for table in tableList:
-        backupFileds =dicts2.get(table).get('field')
-        keyFields = dicts2.get(table).get('key')
-        for backupFiled in backupFileds:
-            fieldSql = "insert into backupFieldKey (tableName,fieldChosed,fieldType,isSystemDefine) values " \
-                       "('%s','%s',1,0)"%(table,backupFiled)
-            sqliteConn.execute(fieldSql)
-        for backupFiled in keyFields:
-            keySql = "insert into backupFieldKey (tableName,fieldChosed,fieldType,isSystemDefine) values " \
-                       "('%s','%s',2,0)"%(table,backupFiled)
-            sqliteConn.execute(keySql)
+        for table in tableList:
+            backupFileds = dicts2.get(table).get('field')
+            keyFields = dicts2.get(table).get('key')
+            for backupFiled in backupFileds:
+                fieldSql = "insert into backupFieldKey (tableName,fieldChosed,fieldType,isSystemDefine) values " \
+                           "('%s','%s',1,0)" % (table, backupFiled)
+                sqliteConn.execute(fieldSql)
+            for backupFiled in keyFields:
+                keySql = "insert into backupFieldKey (tableName,fieldChosed,fieldType,isSystemDefine) values " \
+                         "('%s','%s',2,0)" % (table, backupFiled)
+    sqliteConn.commit()
+    """
+           新增functionQuota与object对应
+    """
+    # for table in tableList:
+    #     for function in functionList:
+    #         fieldSql = "insert into objectFunctionQuota (objectName,objectType,functionQuotaName,functionQuotaType) values " \
+    #                    "('%s',1,'%s',1,0)" % (table, backupFiled)
+    #         sqliteConn.execute(fieldSql)
+    #     for quota in quotaList:
+    #         keySql = "insert into objectFunctionQuota (tableName,fieldChosed,fieldType,isSystemDefine) values " \
+    #                  "('%s','%s',2,0)" % (table, backupFiled)
+    #         sqliteConn.execute(keySql)
 
 
-
-
-returnDict = {'module': '模块一', 'function': ['C', 'C++'], 'quota': ['Java', 'JavaScript'], 'process': ['C'], 'view': ['JavaScript'], 'table': ['JavaScript']}
-returnTableDict = {'JavaScript': {'key': ['id'], 'field': ['id']}}
-
+returnDict = {'module': '模块1', 'function': [], 'quota': [], 'process': [], 'view': [], 'table': ['COURSE']}
+returnTableDict = {'COURSE': {'key': ['CNAME'], 'field': ['CNO', 'TNO', 'CNAME']}}
+print(insertMoudleObjectsField(returnDict,returnTableDict))
 
 
