@@ -71,7 +71,7 @@ print(getMoudleInfo())
 """
 def insertModuleList(moduleName):
     sqlite3Conn = getSqliteConnection()
-    sql = "INSERT INTO ModuleList(moduleName,isSystemDefineModule) VALUES('%d',0);"%(moduleName)
+    sql = "INSERT INTO ModuleList(moduleName,isSystemDefineModule) VALUES('%s',0);"%(moduleName)
     sqlite3Conn.execute(sql)
     sqlite3Conn.commit()
     sqlite3Conn.close()
@@ -140,7 +140,7 @@ print(getSetupList())
 """
       删除一个模块及关于此模块的配置的信息
 """
-def deleteMoudleList(moudleName):
+def deleteMoudle(moudleName):
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
     moduleObjectsql = "delete from moudleObject where moduleName = %s and isSystemDefine = 0 "%(moudleName)

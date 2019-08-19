@@ -36,7 +36,7 @@ def getOrcaleConnection():
         return connection
     except cx_Oracle.DatabaseError as msg:
         print(msg)
-        return -1
+        return connection
 def getSqliteConnection():
 
     try:
@@ -44,7 +44,22 @@ def getSqliteConnection():
         return connection
     except cx_Oracle.DatabaseError as msg:
         print(msg)
-        return -1
+        return connection
+def sqliteExecute(sql):
+    sqlConn = getSqliteConnection()
+    try:
+        sqliteCursor = sqlConn.cursor()
+        sqliteCursor.execute(sql)
+        returnList = sqliteCursor.fetchall()
+        sqlConn.commit()
+        return returnList
+    except sqlite3.Error as errmsg:
+        print(errmsg)
 # 测试语句 第一条正常 第二条报错
 # print(connectOracle('faisdb','faisdb','192.168.36.244','fais'))
 # print(connectOracle('faisdb','faisdb','192.168.36.244','fais1'))
+def oracleExcute(sql):
+    oracleConn = getOrcaleConnection()
+    try:
+        oracleConn.execute(sql)
+        oracleConn.
