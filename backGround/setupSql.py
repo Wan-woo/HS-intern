@@ -10,8 +10,7 @@
 @returnParam:
 '''
 import sqlite3
-from backGround.testConnection import getOrcaleConnection,getSqliteConnection
-
+from backGround.testConnection import getOrcaleConnection,getSqliteConnection,oracleExcute,sqliteExecute
 
 
 """
@@ -70,11 +69,9 @@ print(getMoudleInfo())
       增加一个新模块
 """
 def insertModule(moduleName):
-    sqlite3Conn = getSqliteConnection()
+
     sql = "INSERT INTO ModuleList(moduleName,isSystemDefineModule) VALUES('%s',0);"%(moduleName)
-    sqlite3Conn.execute(sql)
-    sqlite3Conn.commit()
-    sqlite3Conn.close()
+    sqliteExecute(sql)
 """
       获得当前Oracle中所有表存储过程视图
 """
@@ -141,15 +138,13 @@ print(getSetupList())
       删除一个模块及关于此模块的配置的信息
 """
 def deleteMoudle(moudleName):
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
+
     moduleObjectsql = "delete from moudleObject where moduleName = %s and isSystemDefine = 0 "%(moudleName)
     modulesql = "delete from moudleList where moduleName = %s and isSystemDefine = 0 "%(moudleName)
-    sqlite3Cursor.execute(moduleObjectsql)
-    sqlite3Cursor.execute(modulesql)
-    sqlite3Cursor.close()
-    sqlite3Conn.commit()
-    sqlite3Conn.close()
+    sqliteExecute(moduleObjectsql)
+    sqliteExecute(modulesql)
+
+
 """
       删除一条配置信息
 """

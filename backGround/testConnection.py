@@ -12,8 +12,26 @@
 import cx_Oracle
 import sqlite3
 import backGround.globalConn as gC
-from backGround.setupSql import tuplesToList
 
+
+"""
+      处理返回的一维列表
+"""
+def tuplesToList(fetchTuples):
+    returnList = []
+    if(len(fetchTuples)==0):
+        return []
+    if(len(fetchTuples[0])==1):
+        for subTuple in fetchTuples:
+
+            returnList.append(subTuple[0])
+    else:
+        for subTuple in fetchTuples:
+            if(subTuple==None):
+                returnList.append([])
+            else:
+                returnList.append(list(subTuple))
+    return returnList
 def connectOracle(userName, passWord, host, serviceName):
     try:
         connection=cx_Oracle.connect(userName, passWord, host + "/" + serviceName)
