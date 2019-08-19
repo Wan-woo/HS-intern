@@ -12,7 +12,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         # 新建设置frame、模块编辑frame和新增配置frame
         self.setupFrame = QFrame()
         self.editModuleFrame = QFrame()
-        self.addSetupFrame = QFrame()
+        #self.addSetupFrame = QFrame()
         # 新增一个GridLayout
         self.setupLayout = QGridLayout(self.setupFrame)
         # 设置一个按钮Layout
@@ -45,21 +45,13 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.editModuleBtn.clicked.connect(self.editModuleBtn_clicked)
         self.addBtn.clicked.connect(self.addBtn_clicked)
 
-        # 最终数据以字典形式进行返回
-        self.returnDict = {}
-        # 详细的表与字段放在另一张表中
-        self.returnTableDict = {}
-        # 用于存放暂时配置成功的所有表名
-        self.tempTableList = []
-        # 用于存放暂时配置成功的表字段信息，使用双重字典
-        self.tempReturnDict = {}
-
     def loadData(self):
         # 加载所有需要的数据项
         # 加载匹配项
         self.functionList = getFunctionQuotaInfo()[0]
         self.quotaList = getFunctionQuotaInfo()[1]
         self.moduleList = getMoudleInfo()
+        print(getOracleInfo())
         self.tableList = getOracleInfo()[0]
         self.processList = getOracleInfo()[1]
         self.viewList = getOracleInfo()[2]
@@ -103,6 +95,7 @@ class SetupPage(modelPage.Ui_MainWindow):
 
     def returnBtn_clicked(self):
         self.editModuleFrame.setVisible(False)
+        self.loadData()
         self.setupFrame.setVisible(True)
 
     def returnBtn2_clicked(self):
@@ -114,6 +107,22 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.setupFrame.setVisible(False)
         self.setAddSetupFrame()
         self.addSetupFrame.setVisible(True)
+
+    def addModuleBtn_clicked(self):
+        moduleName = self.addModuleLineText.text()
+        if moduleName == '':
+            QMessageBox.question(self, 'Message', "输入模块名不能为空", QMessageBox.Yes, QMessageBox.Yes)
+            return
+        elif moduleName in self.moduleList:
+            QMessageBox.question(self, 'Message', "输入模块名不能重复", QMessageBox.Yes, QMessageBox.Yes)
+            return
+        print(moduleName)
+        insertModuleList(moduleName)
+        print('yes')
+        pass
+
+    def delModuleBtn_clicked(self):
+        pass
 
     def processLineEdit_changed(self):
         # 如果有上次未读出的item，先读出
@@ -258,6 +267,9 @@ class SetupPage(modelPage.Ui_MainWindow):
         print(self.returnDict)
         print(self.returnTableDict)
         insertMoudleObjectsField(self.returnDict, self.returnTableDict)
+        # 立刻返回
+        self.addSetupFrame.deleteLater()
+        self.setAddSetupFrame()
 
     def setEditModuleFrame(self):
         # 为frame新建一个Layout
@@ -282,6 +294,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.addModuleLineLayout.addWidget(self.addModuleLineLable)
         self.addModuleLineLayout.addWidget(self.addModuleLineText)
         self.addModuleBtn = QPushButton('新建模块')
+        self.addModuleBtn.clicked.connect(self.addModuleBtn_clicked)
         self.addModuleLayout.addWidget(self.addModuleLable, alignment=Qt.AlignCenter)
         self.addModuleLayout.addLayout(self.addModuleLineLayout)
         self.addModuleLayout.addWidget(self.addModuleBtn)
@@ -295,6 +308,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.delModuleLineLayout.addWidget(self.delModuleLineLable)
         self.delModuleLineLayout.addWidget(self.delModuleLineText)
         self.delModuleBtn = QPushButton('删除模块')
+        self.delModuleBtn.clicked.connect(self.delModuleBtn_clicked)
         self.delModuleLayout.addWidget(self.delModuleLable, alignment=Qt.AlignCenter)
         self.delModuleLayout.addLayout(self.delModuleLineLayout)
         self.delModuleLayout.addWidget(self.delModuleBtn)
@@ -307,6 +321,16 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.returnLayout().addWidget(self.editModuleFrame, 1, 0, 2, 5)
 
     def setAddSetupFrame(self):
+        # 将所有变量放置页面初始化处刷新
+        # 最终数据以字典形式进行返回
+        self.returnDict = {}
+        # 详细的表与字段放在另一张表中
+        self.returnTableDict = {}
+        # 用于存放暂时配置成功的所有表名
+        self.tempTableList = []
+        # 用于存放暂时配置成功的表字段信息，使用双重字典
+        self.tempReturnDict = {}
+        self.addSetupFrame = QFrame()
         self.addSetupLayout = QGridLayout(self.addSetupFrame)
         # 增加页面返回按钮
         self.returnBtn2 = QPushButton('返回')

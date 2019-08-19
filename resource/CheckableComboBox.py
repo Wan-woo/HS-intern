@@ -19,6 +19,12 @@ class CheckableComboBox(QtWidgets.QComboBox):
             item = self.model().item(index, 0)
             item.setCheckState(QtCore.Qt.Unchecked)
 
+    def clearItemPressed(self):
+        for index in range(self.count()):
+            item = self.model().item(index)
+            if item.checkState() == QtCore.Qt.Checked:
+                item.setCheckState(QtCore.Qt.Unchecked)
+
     def handleItemPressed(self, index):
         item = self.model().itemFromIndex(index)
         if item.checkState() == QtCore.Qt.Checked:
