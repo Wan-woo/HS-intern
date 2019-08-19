@@ -12,6 +12,7 @@
 import cx_Oracle
 import sqlite3
 import backGround.globalConn as gC
+from backGround.setupSql import tuplesToList
 
 def connectOracle(userName, passWord, host, serviceName):
     try:
@@ -52,6 +53,7 @@ def sqliteExecute(sql):
         sqliteCursor.execute(sql)
         returnList = sqliteCursor.fetchall()
         sqlConn.commit()
+        returnList = tuplesToList(returnList)
         return returnList
     except sqlite3.Error as errmsg:
         print(errmsg)
@@ -61,5 +63,13 @@ def sqliteExecute(sql):
 def oracleExcute(sql):
     oracleConn = getOrcaleConnection()
     try:
-        oracleConn.execute(sql)
-        oracleConn.
+        oracleCursor = oracleConn.cursor()
+        oracleCursor.execute(sql)
+        returnList = oracleCursor.fetchall()
+        oracleConn.commit()
+        returnList = tuplesToList(returnList)
+        return returnList
+    except cx_Oracle.DatabaseError as errmsg:
+        print(errmsg)
+
+
