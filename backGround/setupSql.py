@@ -69,7 +69,7 @@ print(getMoudleInfo())
 """
       增加一个新模块
 """
-def insertModuleList(moduleName):
+def insertModule(moduleName):
     sqlite3Conn = getSqliteConnection()
     sql = "INSERT INTO ModuleList(moduleName,isSystemDefineModule) VALUES('%s',0);"%(moduleName)
     sqlite3Conn.execute(sql)
