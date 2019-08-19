@@ -11,7 +11,7 @@
 '''
 def _init():
     global _global_dict
-    _global_dict = {'userName':'zwd','passWord':'123456','host':'127.0.0.1','serviceName':'orcl.hs.handsome.com.cn'}
+    _global_dict = {'userName':'zwd','passWord':'123456','host':'192.168.230.187','serviceName':'orcl.hs.handsome.com.cn'}
 
 def set_value(name, value):
     _global_dict[name] = value

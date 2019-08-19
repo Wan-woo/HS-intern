@@ -23,10 +23,14 @@ def tuplesToList(fetchTuples):
         return
     if(len(fetchTuples[0])==1):
         for subTuple in fetchTuples:
+
             returnList.append(subTuple[0])
     else:
         for subTuple in fetchTuples:
-            returnList.append(list(subTuple))
+            if(subTuple==None):
+                returnList.append([])
+            else:
+                returnList.append(list(subTuple))
     return returnList
 
 

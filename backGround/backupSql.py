@@ -10,7 +10,8 @@
 @returnParam:
 '''
 import sqlite3
-
+from backGround.testConnection import getOrcaleConnection,connectOracle
+from backGround.setupSql import getbackupFieldKey
 
 """
         检查是否存在sqlite库，没有则创建库
@@ -46,21 +47,25 @@ def checkSystemDb():
                 sqlite3Conn.commit()
                 sqlite3Conn.close()
 
+
 def tuplesToList(fetchTuples):
     returnList = []
-    if(len(fetchTuples)==0):
+    if (len(fetchTuples) == 0):
         return
-    if(len(fetchTuples[0])==1):
+    if (len(fetchTuples[0]) == 1):
         for subTuple in fetchTuples:
             returnList.append(subTuple[0])
     else:
         for subTuple in fetchTuples:
-            returnList.append(list(subTuple))
+            if (subTuple == None):
+                returnList.append([])
+            else:
+                returnList.append(list(subTuple))
     return returnList
 
 
 """
-      获得备份列表
+      获得备份列表信息
 """
 def getBackupInfomation():
     checkSystemDb()
@@ -71,7 +76,20 @@ def getBackupInfomation():
     backInformationList = tuplesToList(backInformationList)
     sqlite3Conn.close()
     return backInformationList
-print(getBackupInfomation())
+
+
+"""
+      创建新的备份
+"""
+def createBackupTable(timeList,tableList,processList,viewList):
+    backupVersionId = getbackupVersionId()
+    createBackupTable(timeList[0],timeList[1],tableList,backupVersionId)
+    # createProcess(processList,backupVersionId)
+    # createView(viewList,backupVersionId)
+
+
+
+
 """
       通过备份名获得备份详细内容
 """
@@ -95,11 +113,12 @@ def getObjectByVersion(backupVersion):
     sqlite3Cursor.execute(sql)
     objectList = sqlite3Cursor.fetchall()
     sqlite3Conn.close()
+    objectList = tuplesToList(objectList)
     return objectList
 print(getObjectByVersion("1"))
 
 """
-       获得新的备份的备份表id起始范围
+       获得新的备份的备份表目标id起始范围
 """
 def getbackupObjectId():
     sqlite3Conn = sqlite3.connect('test.db')
@@ -145,3 +164,39 @@ def getObjectByType(typeCode):
     sqlite3Conn.close()
     return objectList
 
+
+"""
+      增加新的表备份
+      输入参数：objectList 
+      格式：[备份开始时间，备份截止时间，[对象名]，备份版本号] 
+
+"""
+
+
+def createBackupTable(beginTime, endTime, tableList, backupVersionId):
+    startId = getbackupObjectId()
+    sqlite3Conn = sqlite3.connect('test.db')
+    sqlite3Cursor = sqlite3Conn.cursor()
+    oracleConn = getOrcaleConnection()
+    oracleCursor = oracleConn.cursor()
+    for list in tableList:
+        print(getbackupFieldKey(list[0]))
+        fieldList = getbackupFieldKey(list[0])
+        fieldList = fieldList[0]
+        fieldStr = ''
+        for field in fieldList:
+            fieldStr += field[0] + ','
+        lenthField = len(fieldStr)
+        fieldStr = fieldStr[0:lenthField - 1]
+        createSql = 'create table  %s as select %s from %s WHERE FDATE between %s and %s' \
+                    % ('backup' + str(startId), fieldStr, list, beginTime, endTime)
+        print(createSql)
+        oracleCursor.execute(createSql)
+        insertNameListSql = 'insert into backupObjectNameList (backupVersion,objectName,backupObjectName,ObjectType) ' \
+                            'values("%s","%s","%s",1)' % (backupVersionId, list, "backup" + str(startId))
+        sqlite3Cursor.execute(insertNameListSql)
+
+        startId += 1
+
+    sqlite3Conn.commit()
+    sqlite3Conn.close()
