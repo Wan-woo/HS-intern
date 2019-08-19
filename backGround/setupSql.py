@@ -179,16 +179,19 @@ def getObjectByModule(moduleName):
     sqlite3Conn = sqlite3.connect('test.db')
     sqlite3Cursor = sqlite3Conn.cursor()
     tableSql = "SELECT objectName FROM moduleObject WHERE type = 1 AND modulename = %s"%(moduleName)
-    storeSql = "SELECT objectName FROM moduleObject WHERE type = 2 AND modulename = %s"%(moduleName)
+    processSql = "SELECT objectName FROM moduleObject WHERE type = 2 AND modulename = %s"%(moduleName)
     viewSql = "SELECT objectName FROM moduleObject WHERE type = 3 AND modulename = %s"%(moduleName)
     sqlite3Cursor.execute(tableSql)
     tableName = sqlite3Cursor.fetchall()
-    sqlite3Cursor.execute(storeSql)
-    storeName = sqlite3Cursor.fetchall()
+    tableName = tuplesToList(tableName)
+    sqlite3Cursor.execute(processSql)
+    processName = sqlite3Cursor.fetchall()
+    processName = tuplesToList(processName)
     sqlite3Cursor.execute(viewSql)
     viewName = sqlite3Cursor.fetchall()
+    viewName = tuplesToList(viewName)
     sqlite3Conn.close()
-    return tableName,storeName,viewName
+    return tableName,processName,viewName
 
 
 
