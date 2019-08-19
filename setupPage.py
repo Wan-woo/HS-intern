@@ -24,7 +24,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.editModuleBtn = QPushButton('模块编辑')
         self.setupTable = QTableWidget()
         self.setupTable.setColumnCount(6)
-        self.setupTable.setHorizontalHeaderLabels([' ', '模块名', '类型', '名称', '影响功能', '影响指标'])
+        self.setupTable.setHorizontalHeaderLabels([' ', '模块名', '名称', '类型', '影响功能', '影响指标'])
 
         # 将以上组件添加进入Layout当中
         self.buttonLayout.addWidget(self.addBtn)
@@ -108,6 +108,14 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.setAddSetupFrame()
         self.addSetupFrame.setVisible(True)
 
+    def delBtn_clicked(self):
+        for i in range(self.setupTable.rowCount()):
+            if self.setupTable.cellWidget(i, 0).isChecked():
+                print(','.join([self.setupTable.item(i,1).text(), self.setupTable.item(i,2).text(), self.setupTable.item(i,3).text()]))
+                deleteMoudleList([self.setupTable.item(i,1).text(), self.setupTable.item(i,2).text(), self.setupTable.item(i,3).text()])
+        self.loadData()
+        pass
+
     def addModuleBtn_clicked(self):
         moduleName = self.addModuleLineText.text()
         if moduleName == '':
@@ -117,11 +125,15 @@ class SetupPage(modelPage.Ui_MainWindow):
             QMessageBox.question(self, 'Message', "输入模块名不能重复", QMessageBox.Yes, QMessageBox.Yes)
             return
         print(moduleName)
-        insertModuleList(moduleName)
+        insertModule(moduleName)
         print('yes')
         pass
 
     def delModuleBtn_clicked(self):
+        moduleName = self.delModuleLineText.currentText()
+        print(moduleName)
+        deleteMoudle(moduleName)
+        print('yes')
         pass
 
     def processLineEdit_changed(self):
@@ -303,7 +315,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.delModuleLineLayout = QHBoxLayout()
         self.delModuleLineLable = QLabel('请选择删除模块名')
         self.delModuleLineText = QComboBox()
-        self.delModuleLineText.addItems(self.moduleList)
+        self.delModuleLineText.addItems(getMoudleInfo())
         self.delModuleLineText.setFixedWidth(150)
         self.delModuleLineLayout.addWidget(self.delModuleLineLable)
         self.delModuleLineLayout.addWidget(self.delModuleLineText)
