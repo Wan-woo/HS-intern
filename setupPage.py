@@ -44,6 +44,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         # 添加槽函数
         self.editModuleBtn.clicked.connect(self.editModuleBtn_clicked)
         self.addBtn.clicked.connect(self.addBtn_clicked)
+        self.delBtn.clicked.connect(self.delBtn_clicked)
 
     def loadData(self):
         # 加载所有需要的数据项
