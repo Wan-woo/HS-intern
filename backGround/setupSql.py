@@ -20,7 +20,7 @@ from backGround.testConnection import getOrcaleConnection,getSqliteConnection
 def tuplesToList(fetchTuples):
     returnList = []
     if(len(fetchTuples)==0):
-        return
+        return []
     if(len(fetchTuples[0])==1):
         for subTuple in fetchTuples:
 
