@@ -149,22 +149,18 @@ def deleteMoudle(moudleName):
       删除一条配置信息
 """
 def deleteMoudleList(setupList):
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
-    for setup in setupList:
-        if (setup[2] == '表'):
-            setup[2] = 1
-        elif (setup[2] == "存储过程"):
-            setup[2] = 2
-        elif (setup[2] == "视图"):
-            setup[2] = 3
-        moduleObjectsql = "delete from moudleObject where moduleName = '%s' and objectName='%s'" \
-                          " and objectName='%d' and isSystemDefine = 0 "%(setup[0],setup[1],setup[2])
 
-    sqlite3Cursor.execute(moduleObjectsql)
-    sqlite3Cursor.close()
-    sqlite3Conn.commit()
-    sqlite3Conn.close()
+
+
+    if (setupList[2] == "表"):
+        setupList[2] = 1
+    elif (setupList[2] == "存储过程"):
+        setupList[2] = 2
+    elif (setupList[2] == "视图"):
+        setupList[2] = 3
+    moduleObjectsql = "delete from moduleObject where moduleName = '%s' and objectName='%s' and objectType='%s' and isSystemDefine = '0' "%(setupList[0],setupList[1],setupList[2])
+
+    sqliteExecute(moduleObjectsql)
 
 """
         通过模块名查询对象
