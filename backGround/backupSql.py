@@ -10,8 +10,8 @@
 @returnParam:
 '''
 import sqlite3
-from backGround.testConnection import getOrcaleConnection,connectOracle,sqliteExecute,oracleExcute
-from backGround.setupSql import getbackupFieldKey
+from backGround.testConnection import getOrcaleConnection,connectOracle,sqliteExecute,oracleExcute,oracleNoFetch
+from backGround.setupSql import getbackupFieldKey,listsToList
 
 """
         检查是否存在sqlite库，没有则创建库
@@ -49,15 +49,13 @@ def tuplesToList(fetchTuples):
     returnList = []
     if (len(fetchTuples) == 0):
         return
-    if (len(fetchTuples[0]) == 1):
-        for subTuple in fetchTuples:
-            returnList.append(subTuple[0])
-    else:
-        for subTuple in fetchTuples:
-            if (subTuple == None):
-                returnList.append([])
-            else:
-                returnList.append(list(subTuple))
+
+
+    for subTuple in fetchTuples:
+        if (subTuple == None):
+            returnList.append([])
+        else:
+            returnList.append(list(subTuple))
     return returnList
 
 
@@ -86,10 +84,12 @@ def createNewBackup(timeList,tableList,processList,viewList):
 def deleteBackup(backupVersion):
     tableList = getObjectByVersion(backupVersion)[0]
     for table in tableList:
-        delTableSql = "drop table '%s' "%(table[1])
-        oracleExcute(delTableSql)
-    delBackupSql = "delete from backupInformation where backupVersion = '%s' "%(backupVersion)
-
+        delTableSql = "drop table %s "%('backup'+str(table[1]))
+        oracleNoFetch(delTableSql)
+    delBackupObjectNameList = "delete from backupObjectNameList where backupVersion = '%s' "%(backupVersion)
+    delBackupInformation = "delete from backupInformation where backupVersion = '%s' "%(backupVersion)
+    sqliteExecute(delBackupInformation)
+    sqliteExecute(delBackupObjectNameList)
 """
       通过备份名获得备份时间
 """
@@ -109,8 +109,11 @@ def getObjectByVersion(backupVersion):
     processSql = "SELECT objectName,backupObjectName FROM backupObjectNameList WHERE backupVersion =%s and objectType='2'"%(backupVersion)
     viewSql = "SELECT objectName,backupObjectName FROM backupObjectNameList WHERE backupVersion =%s and objectType='3'"%(backupVersion)
     tableList = sqliteExecute(tableSql)
+
     processList = sqliteExecute(processSql)
+
     viewList = sqliteExecute(viewSql)
+
     return tableList,processList,viewList
 print(getObjectByVersion("1"))
 
@@ -120,11 +123,13 @@ print(getObjectByVersion("1"))
 def getbackupObjectId():
 
     askSql = 'SELECT max(backupObjectName) from backupObjectNameList'
-    version =     sqliteExecute(askSql)
-    if (version == (None,)):
+    version =  sqliteExecute(askSql)[0]
+
+    print(len(version))
+    if ((len(version)==0)|(version[0]=='')):
         backupObjectName = 1
     else:
-        backupObjectName = int(version[0][6:]) + 1
+        backupObjectName = int(version[0]) + 1
     return backupObjectName
 
 """
@@ -134,19 +139,20 @@ def getbackupVersionId():
 
     askSql = 'SELECT max(backupVersion) from backupInformation'
     versionList = sqliteExecute(askSql)
-
-    if (versionList == (None,)):
+    versionList = listsToList(versionList)
+    if (versionList == [None]):
         backupVersion = 1
     else:
         backupVersion = versionList[0] + 1
 
     return backupVersion
+print(getbackupObjectId())
 """
     在backupInformation中插入备份信息
 """
 def insertBackupInformation(backupVersion,beginTime,endTime):
     getDataSql = "select datetime(CURRENT_TIMESTAMP,'localtime');"
-    curData = sqliteExecute(getDataSql)
+    curData = sqliteExecute(getDataSql)[0][0]
     insertSql = "insert into backupInformation (backupVersion,backupTime,beginTime,endTime,hasContrast)values('%s','%s','%s','%s','%s') "%(backupVersion,curData,beginTime,endTime,0)
     sqliteExecute(insertSql)
 """
@@ -173,20 +179,22 @@ def createBackupTable(beginTime, endTime, tableList, backupVersionId):
     startId = getbackupObjectId()
 
     for list in tableList:
-        print(getbackupFieldKey(list[0]))
-        fieldList = getbackupFieldKey(list[0])
+        print(getbackupFieldKey(list))
+        fieldList = getbackupFieldKey(list)
         fieldList = fieldList[0]
         fieldStr = ''
         for field in fieldList:
-            fieldStr += field[0] + ','
+            fieldStr += field + ','
         lenthField = len(fieldStr)
         fieldStr = fieldStr[0:lenthField - 1]
-        createSql = 'create table  %s as select %s from %s WHERE FDATE between %s and %s' \
-                    % ('backup' + str(startId), fieldStr, list, beginTime, endTime)
+        # createSql = 'create table  %s as select %s from %s WHERE FDATE between %s and %s' \
+        #             % ('backup' + str(startId), fieldStr, list, beginTime, endTime)
+        createSql = 'create table  %s as select %s from %s ' \
+                    % ('backup' + str(startId), fieldStr, list)
         print(createSql)
-        oracleExcute(createSql)
+        oracleNoFetch(createSql)
         insertNameListSql = 'insert into backupObjectNameList (backupVersion,objectName,backupObjectName,ObjectType) ' \
-                            'values("%s","%s","%s",1)' % (backupVersionId, list, "backup" + str(startId))
+                            'values("%s","%s","%s",1)' % (backupVersionId, list, startId)
         sqliteExecute(insertNameListSql)
 
         startId += 1

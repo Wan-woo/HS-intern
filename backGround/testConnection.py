@@ -21,16 +21,12 @@ def tuplesToList(fetchTuples):
     returnList = []
     if(len(fetchTuples)==0):
         return []
-    if(len(fetchTuples[0])==1):
-        for subTuple in fetchTuples:
 
-            returnList.append(subTuple[0])
-    else:
-        for subTuple in fetchTuples:
-            if(subTuple==None):
-                returnList.append([])
-            else:
-                returnList.append(list(subTuple))
+    for subTuple in fetchTuples:
+        if(subTuple==None):
+            returnList.append([])
+        else:
+            returnList.append(list(subTuple))
     return returnList
 def connectOracle(userName, passWord, host, serviceName):
     try:
@@ -75,6 +71,7 @@ def sqliteExecute(sql):
         return returnList
     except sqlite3.Error as errmsg:
         print(errmsg)
+        print(sql)
 # 测试语句 第一条正常 第二条报错
 # print(connectOracle('faisdb','faisdb','192.168.36.244','fais'))
 # print(connectOracle('faisdb','faisdb','192.168.36.244','fais1'))
@@ -89,6 +86,7 @@ def oracleExcute(sql):
         return returnList
     except cx_Oracle.DatabaseError as errmsg:
         print(errmsg)
+        print(sql)
 def oracleNoFetch(sql):
     oracleConn = getOrcaleConnection()
     try:
@@ -97,4 +95,5 @@ def oracleNoFetch(sql):
         oracleConn.commit()
     except cx_Oracle.DatabaseError as errmsg:
         print(errmsg)
+        print(sql)
 

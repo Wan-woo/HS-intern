@@ -20,19 +20,23 @@ def tuplesToList(fetchTuples):
     returnList = []
     if(len(fetchTuples)==0):
         return []
-    if(len(fetchTuples[0])==1):
-        for subTuple in fetchTuples:
 
-            returnList.append(subTuple[0])
-    else:
-        for subTuple in fetchTuples:
-            if(subTuple==None):
-                returnList.append([])
-            else:
-                returnList.append(list(subTuple))
+    for subTuple in fetchTuples:
+        if(subTuple==None):
+            returnList.append([])
+        else:
+            returnList.append(list(subTuple))
     return returnList
-
-
+"""
+    处理二维列表为一维（每一个列表只有一个元素）
+"""
+def listsToList(lists):
+    returnList = []
+    if(lists==None):
+        return []
+    for subList in lists:
+        returnList.append(subList[0])
+    return returnList
 """
         获取功能指标列表
 """
@@ -56,7 +60,7 @@ def getFunctionQuotaInfo():
 def getModuleInfo():
     sql = "SELECT moduleName FROM moduleList"
     moduleInfo = sqliteExecute(sql)
-
+    moduleInfo = listsToList(moduleInfo)
 
     return moduleInfo
 print(getModuleInfo())
@@ -75,6 +79,7 @@ def insertModule(moduleName):
 def getOracleInfo():
 
     tableList = oracleExcute("Select object_name From user_objects Where object_type='TABLE' ")
+    tableList = listsToList(tableList)
     try:
         tableList.index("CONTRASTRESULTS")
     except ValueError :
@@ -84,14 +89,17 @@ def getOracleInfo():
               '"PRIMARYKEYVALUE" VARCHAR2(4000),	"DIFFERENCETYPE" NUMBER(*,0)   ) '
         oracleNoFetch(sql)
     produceList = oracleExcute("Select object_name From user_objects Where object_type='PROCEDURE' ")
+    produceList = listsToList(produceList)
 
     viewList = oracleExcute("Select object_name From user_objects Where object_type='VIEW' ")
+    viewList = listsToList(viewList)
 
     fieldDicts={}
     for table in tableList:
         fieldSql = "select COLUMN_NAME from USER_COL_COMMENTS where table_name = '%s'"%(table)
 
         fieldList = oracleExcute(fieldSql)
+        fieldList = listsToList(fieldList)
 
         fieldDicts[table]=fieldList
     return [tableList,produceList,viewList,fieldDicts]
@@ -111,14 +119,14 @@ def getSetupList():
         return
     for moduleObject in moduleObjects:
         functionSql  = "select functionQuotaName from objectFunctionQuota where objectName = '%s' and objectType='%s' and functionQuotaType=1"%(moduleObject[1],moduleObject[2])
-        result=sqliteExecute(functionSql)
+        functionResult=sqliteExecute(functionSql)
+        functionResult = listsToList(functionResult)
 
-
-        moduleObject.append(result)
+        moduleObject.append(functionResult)
         quotaSql  = "select functionQuotaName from objectFunctionQuota where objectName = '%s' and objectType='%s' and functionQuotaType=2"%(moduleObject[1],moduleObject[2])
-        result= sqliteExecute(quotaSql)
-
-        moduleObject.append(result)
+        quotaResult= sqliteExecute(quotaSql)
+        quotaResult = listsToList(quotaResult)
+        moduleObject.append(quotaResult)
         if(moduleObject[2]==1):
             moduleObject[2]="表"
         elif(moduleObject[2]==2):
@@ -187,10 +195,10 @@ def getbackupFieldKey(tableName):
     fieldSql = 'SELECT fieldChosed from backupFieldKey where tableName = "%s" and fieldType = 1 '%(tableName)
     keySql = 'SELECT fieldChosed from backupFieldKey where tableName = "%s" and fieldType = 2'%(tableName)
     fieldList = sqliteExecute(fieldSql)
-
-    key = sqliteExecute(keySql)
-
-    return fieldList,key
+    fieldList = listsToList(fieldList)
+    keyList = sqliteExecute(keySql)
+    keyList = listsToList(keyList)
+    return fieldList,keyList
 
 
 
@@ -224,18 +232,18 @@ def insertModuleObjectsField(dicts1,dicts2):
     """
         新增备份字段与对比主键 
     """
+
     for table in tableList:
-        for table in tableList:
-            backupFileds = dicts2.get(table).get('field')
-            keyFields = dicts2.get(table).get('key')
-            for backupFiled in backupFileds:
-                fieldSql = "insert into backupFieldKey (tableName,fieldChosed,fieldType,isSystemDefine) values " \
-                           "('%s','%s',1,0)" % (table, backupFiled)
-                sqliteExecute(fieldSql)
-            for backupFiled in keyFields:
-                keySql = "insert into backupFieldKey (tableName,fieldChosed,fieldType,isSystemDefine) values " \
-                         "('%s','%s',2,0)" % (table, backupFiled)
-                sqliteExecute(keySql)
+        backupFileds = dicts2.get(table).get('field')
+        keyFields = dicts2.get(table).get('key')
+        for backupFiled in backupFileds:
+            fieldSql = "insert into backupFieldKey (tableName,fieldChosed,fieldType,isSystemDefine) values " \
+                       "('%s','%s',1,0)" % (table, backupFiled)
+            sqliteExecute(fieldSql)
+        for backupFiled in keyFields:
+            keySql = "insert into backupFieldKey (tableName,fieldChosed,fieldType,isSystemDefine) values " \
+                     "('%s','%s',2,0)" % (table, backupFiled)
+            sqliteExecute(keySql)
 
     """
            新增functionQuota与object对应
