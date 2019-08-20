@@ -162,9 +162,9 @@ def deleteModuleList(setupList):
 """
 def getObjectByModule(moduleName):
 
-    tableSql = "SELECT objectName FROM moduleObject WHERE type = 1 AND modulename = %s"%(moduleName)
-    processSql = "SELECT objectName FROM moduleObject WHERE type = 2 AND modulename = %s"%(moduleName)
-    viewSql = "SELECT objectName FROM moduleObject WHERE type = 3 AND modulename = %s"%(moduleName)
+    tableSql = "SELECT objectName FROM moduleObject WHERE objectType = 1 AND modulename = %s"%(moduleName)
+    processSql = "SELECT objectName FROM moduleObject WHERE objectType = 2 AND modulename = %s"%(moduleName)
+    viewSql = "SELECT objectName FROM moduleObject WHERE objectType = 3 AND modulename = %s"%(moduleName)
 
     tableName = sqliteExecute(tableSql)
 
@@ -254,8 +254,8 @@ def insertModuleObjectsField(dicts1,dicts2):
     修改当前存在对比的版本
 """
 def changeCurContrast(backupVersion):
-    removeSql = "update backupInformation set hasContrast = 0 "
-    setSql = "update backupInformation set hasContrast = 1 where backupVersion='%s'"(backupVersion)
+    removeSql = "update backupInformation set hasContrast = '0' "
+    setSql = "update backupInformation set hasContrast = '1' where backupVersion='%s'"%(backupVersion)
     sqliteExecute(removeSql)
     sqliteExecute(setSql)
 # returnDict = {'module': '模块1', 'function': [], 'quota': [], 'process': [], 'view': [], 'table': ['COURSE']}

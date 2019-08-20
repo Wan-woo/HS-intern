@@ -16,8 +16,11 @@ import cx_Oracle
 
 
 """
-        修改问题
+        根据表名与类型查询对比结果，类型：1.删除 del 2.新增 3.相同 4.不同
 """
+# def getResultByTableName(tableName):
+
+
 
 """
         将列表类型的字段转换成sql中字段的字符串格式
@@ -39,15 +42,18 @@ def fieldListToStr(fieldList):
         输出：无
 """
 def makeContrasr(backupVersion):
+    truncateSql = "truncate table contrastResults"
+    oracleNoFetch(truncateSql)
+
     [[beginTime,endTime],]=getBackupTime(backupVersion)
-    objectList = getObjectByVersion(backupVersion)
+    tableAndBackupList = getObjectByVersion(backupVersion)[0]
+
     tableList = []
     backupTableList = []
 
-    for object in objectList:
-        if object[1]==1:
-            tableList.append(object[0])
-            backupTableList.append(object[2])
+    for object in tableAndBackupList:
+        tableList.append(object[0])
+        backupTableList.append(object[1])
     for index in range(len(tableList)):
         keySql = "select fieldChosed from backupFieldKey where tableName = '%s' and fieldType = 2 "%(tableList[index])
         fieldSql = "select fieldChosed from backupFieldKey where tableName = '%s' "%(tableList[index])
