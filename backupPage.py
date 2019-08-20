@@ -28,6 +28,8 @@ class BackupPage(modelPage.Ui_MainWindow):
         compareBtn = QPushButton("对比")
         # 新建一个删除按钮
         deleteBtn = QPushButton("删除")
+        # 为删除按钮添加槽函数
+        deleteBtn.clicked.connect(self.deleteBtn_clicked)
         # 新建一个显示表格
         self.backupTable = QTableWidget()
         self.backupTable.setColumnCount(3)
@@ -187,6 +189,13 @@ class BackupPage(modelPage.Ui_MainWindow):
         self.checkBackupFrame.setVisible(False)
         self.setCreateBackupFrame()
         self.createBackupFrame.setVisible(True)
+
+    def deleteBtn_clicked(self):
+        for i in range(self.backupTable.rowCount()):
+            if self.backupTable.cellWidget(i, 0).isChecked():
+                deleteBackup(self.backupTable.item(i, 1).text())
+        self.loadData()
+        pass
 
     def returnBtn_clicked(self):
         self.createBackupFrame.setVisible(False)
