@@ -10,7 +10,7 @@
 @returnParam:
 '''
 import sqlite3
-from backGround.testConnection import getOrcaleConnection,getSqliteConnection,oracleExcute,sqliteExecute
+from backGround.testConnection import getOrcaleConnection,getSqliteConnection,oracleExcute,sqliteExecute,oracleNoFetch
 
 
 """
@@ -74,16 +74,18 @@ def insertModule(moduleName):
 
 def getOracleInfo():
 
-
     tableList = oracleExcute("Select object_name From user_objects Where object_type='TABLE' ")
-
-
+    try:
+        tableList.index("CONTRASTRESULTS")
+    except ValueError :
+        sql = 'CREATE TABLE "CONTRASTRESULTS"  ' \
+              ' (	"ID" NUMBER(*,0) NOT NULL ENABLE,	"BACKUPOBJECTNAME" VARCHAR2(4000),' \
+              '"RECORDID" NUMBER(*,0),	"PRIMARYKEYNAME" VARCHAR2(4000),	' \
+              '"PRIMARYKEYVALUE" VARCHAR2(4000),	"DIFFERENCETYPE" NUMBER(*,0)   ) '
+        oracleNoFetch(sql)
     produceList = oracleExcute("Select object_name From user_objects Where object_type='PROCEDURE' ")
 
-
-
     viewList = oracleExcute("Select object_name From user_objects Where object_type='VIEW' ")
-
 
     fieldDicts={}
     for table in tableList:
@@ -248,7 +250,14 @@ def insertModuleObjectsField(dicts1,dicts2):
     #                  "('%s','%s',2,0)" % (table, backupFiled)
     #         sqliteConn.execute(keySql)
 
-
+"""
+    修改当前存在对比的版本
+"""
+def changeCurContrast(backupVersion):
+    removeSql = "update backupInformation set hasContrast = 0 "
+    setSql = "update backupInformation set hasContrast = 1 where backupVersion='%s'"(backupVersion)
+    sqliteExecute(removeSql)
+    sqliteExecute(setSql)
 # returnDict = {'module': '模块1', 'function': [], 'quota': [], 'process': [], 'view': [], 'table': ['COURSE']}
 # returnTableDict = {'COURSE': {'key': ['CNAME'], 'field': ['CNO', 'TNO', 'CNAME']}}
 # print(insertModuleObjectsField(returnDict,returnTableDict))

@@ -89,5 +89,12 @@ def oracleExcute(sql):
         return returnList
     except cx_Oracle.DatabaseError as errmsg:
         print(errmsg)
-
+def oracleNoFetch(sql):
+    oracleConn = getOrcaleConnection()
+    try:
+        oracleCursor = oracleConn.cursor()
+        oracleCursor.execute(sql)
+        oracleConn.commit()
+    except cx_Oracle.DatabaseError as errmsg:
+        print(errmsg)
 
