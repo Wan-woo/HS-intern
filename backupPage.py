@@ -203,7 +203,9 @@ class BackupPage(modelPage.Ui_MainWindow):
             for i in range(table.rowCount()):
                 if table.cellWidget(i, 0).isChecked():
                     list.append(table.item(i, 1).text())
-            print(list)
+        startTime = self.yearComboBox1.currentText() + self.monthComboBox1.currentText().rjust(2, '0') + self.dayComboBox1.currentText().rjust(2, '0')
+        endTime = self.yearComboBox2.currentText() + self.monthComboBox2.currentText().rjust(2, '0') + self.dayComboBox2.currentText().rjust(2, '0')
+        createNewBackup([startTime, endTime], tableList, processList, viewList)
 
 
 
@@ -216,10 +218,9 @@ class BackupPage(modelPage.Ui_MainWindow):
         self.chooseProcess = []
         self.chooseView = []
         for module in self.chooseModule:
-            self.chooseTable.append(getObjectByModule(module)[0])
-            print(getObjectByModule(module))
-            self.chooseProcess.append(getObjectByModule(module)[1])
-            self.chooseView.append(getObjectByModule(module)[2])
+            self.chooseTable.extend(getObjectByModule(module)[0])
+            self.chooseProcess.extend(getObjectByModule(module)[1])
+            self.chooseView.extend(getObjectByModule(module)[2])
         print(self.chooseTable)
         for item in [[self.chooseTable, self.tableTable], [self.chooseProcess, self.processTable], [self.chooseView, self.viewTable]]:
             chooseList = item[0]
