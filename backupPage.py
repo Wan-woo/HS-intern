@@ -217,6 +217,7 @@ class BackupPage(modelPage.Ui_MainWindow):
         self.chooseView = []
         for module in self.chooseModule:
             self.chooseTable.append(getObjectByModule(module)[0])
+            print(getObjectByModule(module))
             self.chooseProcess.append(getObjectByModule(module)[1])
             self.chooseView.append(getObjectByModule(module)[2])
         print(self.chooseTable)

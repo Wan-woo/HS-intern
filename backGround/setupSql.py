@@ -162,9 +162,9 @@ def deleteModuleList(setupList):
 """
 def getObjectByModule(moduleName):
 
-    tableSql = "SELECT objectName FROM moduleObject WHERE objectType = 1 AND modulename = %s"%(moduleName)
-    processSql = "SELECT objectName FROM moduleObject WHERE objectType = 2 AND modulename = %s"%(moduleName)
-    viewSql = "SELECT objectName FROM moduleObject WHERE objectType = 3 AND modulename = %s"%(moduleName)
+    tableSql = "SELECT objectName FROM moduleObject WHERE objectType = '1' AND modulename = '%s'"%(moduleName)
+    processSql = "SELECT objectName FROM moduleObject WHERE objectType = '2' AND modulename = '%s'"%(moduleName)
+    viewSql = "SELECT objectName FROM moduleObject WHERE objectType = '3' AND modulename = '%s'"%(moduleName)
 
     tableName = sqliteExecute(tableSql)
 
@@ -177,7 +177,7 @@ def getObjectByModule(moduleName):
 
     return tableName,processName,viewName
 
-
+print(getObjectByModule("模块1"))
 
 """
        获得配置的表的主键和备份字段
