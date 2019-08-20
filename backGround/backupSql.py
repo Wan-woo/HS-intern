@@ -80,11 +80,18 @@ def createNewBackup(timeList,tableList,processList,viewList):
     # createView(viewList,backupVersionId)
     insertBackupInformation(backupVersionId,timeList[0],timeList[1])
 
-
-
+"""
+    删除某个备份
+"""
+def deleteBackup(backupVersion):
+    tableList = getObjectByVersion(backupVersion)[0]
+    for table in tableList:
+        delTableSql = "drop table '%s' "%(table[1])
+        oracleExcute(delTableSql)
+    delBackupSql = "delete from backupInformation where backupVersion = '%s' "%(backupVersion)
 
 """
-      通过备份名获得备份详细内容
+      通过备份名获得备份时间
 """
 def getBackupTime(backupVersion):
     checkSystemDb()
@@ -94,13 +101,17 @@ def getBackupTime(backupVersion):
 
 """
         通过备份版本查询对象
-    需要输出的对象类型:type 1.表table 2.存储过程stored procedures 3.视图 view 
+    需要输出的对象类型:二维列表组
 """
 def getObjectByVersion(backupVersion):
 
-    sql = "SELECT objectName,objectType,backupObjectName FROM backupObjectNameList WHERE backupVersion =%s "%(backupVersion)
-    objectList = sqliteExecute(sql)
-    return objectList
+    tableSql = "SELECT objectName,backupObjectName FROM backupObjectNameList WHERE backupVersion =%s and objectType='1'"%(backupVersion)
+    processSql = "SELECT objectName,backupObjectName FROM backupObjectNameList WHERE backupVersion =%s and objectType='2'"%(backupVersion)
+    viewSql = "SELECT objectName,backupObjectName FROM backupObjectNameList WHERE backupVersion =%s and objectType='3'"%(backupVersion)
+    tableList = sqliteExecute(tableSql)
+    processList = sqliteExecute(processSql)
+    viewList = sqliteExecute(viewSql)
+    return tableList,processList,viewList
 print(getObjectByVersion("1"))
 
 """
@@ -157,7 +168,6 @@ def getObjectByType(typeCode):
       格式：[备份开始时间，备份截止时间，[对象名]，备份版本号] 
 
 """
-
 
 def createBackupTable(beginTime, endTime, tableList, backupVersionId):
     startId = getbackupObjectId()
