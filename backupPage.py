@@ -3,7 +3,10 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from resource import NavigationWidget, NavigationWidgetUp
 import modelPage
-import calendar, datetime
+import calendar
+import datetime
+from backGround.backupSql import *
+from backGround.setupSql import *
 
 class BackupPage(modelPage.Ui_MainWindow):
     def __init__(self):
@@ -27,8 +30,8 @@ class BackupPage(modelPage.Ui_MainWindow):
         deleteBtn = QPushButton("删除")
         # 新建一个显示表格
         self.backupTable = QTableWidget()
-        self.backupTable.setColumnCount(4)
-        self.backupTable.setHorizontalHeaderLabels([' ', '序号', '备份名', '备份日期'])
+        self.backupTable.setColumnCount(3)
+        self.backupTable.setHorizontalHeaderLabels([' ', '备份名', '备份日期'])
         # 新建一个横向Layout
         buttonLayout = QHBoxLayout()
         # 新建一个Layout用于右侧
@@ -45,21 +48,19 @@ class BackupPage(modelPage.Ui_MainWindow):
 
     def loadData(self):
         # 此函数用于在登陆成功之后加载数据
-        self.backupTable.setRowCount(12)
+        self.backupInformation = getBackupInfomation()
+        print(self.backupInformation)
+        self.backupTable.setRowCount(len(self.backupInformation))
         self.confirmBtnGroup = QButtonGroup()
         for i in range(self.backupTable.rowCount()):
             self.confirmBtn = QRadioButton()
             self.backupTable.setCellWidget(i, 0, self.confirmBtn)
+            self.backupTable.setItem(i, 1, QTableWidgetItem(str(self.backupInformation[i][0])))
+            self.backupTable.setItem(i, 2, QTableWidgetItem(str(self.backupInformation[i][1])))
             self.confirmBtnGroup.addButton(self.confirmBtn)
             self.confirmBtnGroup.setId(self.confirmBtn, i)
         # 为按钮组添加槽函数
         self.confirmBtnGroup.buttonClicked.connect(self.confirmBtnGroup_clicked)
-
-        # 加载要选择备份的表
-        self.tableList = ['C', 'C++', 'Java', 'JavaScript']
-        self.processList = ['C', 'C++', 'Java', 'JavaScript']
-        self.viewList = ['C', 'C++', 'Java', 'JavaScript']
-
 
     def confirmBtnGroup_clicked(self):
         print(self.confirmBtnGroup.checkedId())
@@ -73,13 +74,13 @@ class BackupPage(modelPage.Ui_MainWindow):
             self.dayComboBox2.addItems([str(x) for x in list(range(1, calendar.monthrange(
                 int(self.yearComboBox2.currentText()), int(self.monthComboBox2.currentText()))[1] + 1))])
 
-
     def setCreateBackupFrame(self):
         # 设置左侧导航条
         self.navigationWidget = NavigationWidget.NavigationWidget()
         self.navigationWidget.setRowHeight(50)
-        self.navigationWidget.setItems([u'常规', u'高级', u'管理', u'其它', u'关于'])
-
+        self.navigationWidget.setItems(getModuleInfo())
+        # 导航条添加槽函数
+        self.navigationWidget.currentItemChanged.connect(self.navigationWidget_currentItemChanged)
         # 新建一个Layout用于安放选择日期
         self.calendarLayout = QHBoxLayout()
         # 新建combobox存放日期
@@ -124,7 +125,11 @@ class BackupPage(modelPage.Ui_MainWindow):
         self.calendarLayout.addWidget(self.monthComboBox2)
         self.calendarLayout.addWidget(QLabel('日'))
         self.calendarLayout.addWidget(self.dayComboBox2)
-
+        # 读取数据、存储过程和视图的所有表格
+        # 加载要选择备份的表
+        self.tableList = getOracleInfo()[0]
+        self.processList = getOracleInfo()[1]
+        self.viewList = getOracleInfo()[2]
         # 创建一个Layout
         self.tableLayout = QHBoxLayout()
         self.tableVlayout = QVBoxLayout()
@@ -162,6 +167,10 @@ class BackupPage(modelPage.Ui_MainWindow):
                 table.setCellWidget(i, 0, QCheckBox())
                 table.setItem(i, 1, QTableWidgetItem(List[i]))
 
+        # 设置一个备份按钮
+        self.submitBtn = QPushButton('备份')
+
+
         # 设置一个返回按钮
         self.returnBtn = QPushButton('返回')
         self.returnBtn.clicked.connect(self.returnBtn_clicked)
@@ -169,6 +178,7 @@ class BackupPage(modelPage.Ui_MainWindow):
         self.createBackupLayout.addWidget(self.navigationWidget, 0, 0, 4, 1)
         self.createBackupLayout.addLayout(self.calendarLayout, 0, 1, 1, 5)
         self.createBackupLayout.addLayout(self.tableLayout, 1, 1, 3, 5)
+        self.createBackupLayout.addWidget(self.submitBtn, 4, 4, 1, 1)
         self.createBackupLayout.addWidget(self.returnBtn, 4, 5, 1, 1)
         # 将frame加入到layout当中
         self.returnLayout().addWidget(self.createBackupFrame, 1, 0, 4, 5)
@@ -180,5 +190,28 @@ class BackupPage(modelPage.Ui_MainWindow):
 
     def returnBtn_clicked(self):
         self.createBackupFrame.setVisible(False)
+        self.loadData()
         self.checkBackupFrame.setVisible(True)
+
+    def navigationWidget_currentItemChanged(self):
+        self.chooseModule = []
+        for index, checkBox in enumerate(self.navigationWidget.checkBoxList):
+            if checkBox.isChecked():
+                self.chooseModule.append(self.navigationWidget.listItems[index])
+        self.chooseTable = []
+        self.chooseProcess = []
+        self.chooseView = []
+        for module in self.chooseModule:
+            self.chooseTable.append(getObjectByModule(module)[0])
+            self.chooseProcess.append(getObjectByModule(module)[1])
+            self.chooseView.append(getObjectByModule(module)[2])
+        for item in [[self.chooseTable, self.tableTable], [self.chooseProcess, self.processTable], [self.chooseView, self.viewTable]]:
+            chooseList = item[0]
+            table = item[1]
+            for i in range(table.rowCount()):
+                if table.item(i, 1).text() in chooseList:
+                    table.cellWidget(i, 0).setChecked(True)
+                else:
+                    table.cellWidget(i, 0).setChecked(False)
+
 

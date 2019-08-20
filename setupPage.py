@@ -11,7 +11,6 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.setupUi()
         # 新建设置frame、模块编辑frame和新增配置frame
         self.setupFrame = QFrame()
-        self.editModuleFrame = QFrame()
         #self.addSetupFrame = QFrame()
         # 新增一个GridLayout
         self.setupLayout = QGridLayout(self.setupFrame)
@@ -59,6 +58,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.fieldTableDict = getOracleInfo()[3]
         self.setupList = getSetupList()
         # 加载
+        self.chooseComboBox.clear()
         self.chooseComboBox.addItems(getModuleInfo())
         # 加载被选择列表
         self.processChooseList = []
@@ -128,6 +128,9 @@ class SetupPage(modelPage.Ui_MainWindow):
         print(moduleName)
         insertModule(moduleName)
         print('yes')
+        # 先进行删除
+        self.editModuleFrame.deleteLater()
+        self.setEditModuleFrame()
         pass
 
     def delModuleBtn_clicked(self):
@@ -135,6 +138,9 @@ class SetupPage(modelPage.Ui_MainWindow):
         print(moduleName)
         deleteModule(moduleName)
         print('yes')
+        # 先进行删除
+        self.editModuleFrame.deleteLater()
+        self.setEditModuleFrame()
         pass
 
     def processLineEdit_changed(self):
@@ -285,6 +291,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.setAddSetupFrame()
 
     def setEditModuleFrame(self):
+        self.editModuleFrame = QFrame()
         # 为frame新建一个Layout
         self.editModuleLayout = QVBoxLayout(self.editModuleFrame)
         self.editModuleLayout.setSpacing(20)
@@ -316,6 +323,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.delModuleLineLayout = QHBoxLayout()
         self.delModuleLineLable = QLabel('请选择删除模块名')
         self.delModuleLineText = QComboBox()
+        self.delModuleLineText.clear()
         self.delModuleLineText.addItems(getModuleInfo())
         self.delModuleLineText.setFixedWidth(150)
         self.delModuleLineLayout.addWidget(self.delModuleLineLable)

@@ -62,4 +62,5 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.pageList = pageList
 
     def loadData(self):
+        # 此函数一般用于加载首个页面的动态数据
         pass

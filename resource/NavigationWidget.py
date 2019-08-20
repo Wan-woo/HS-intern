@@ -12,8 +12,9 @@ class NavigationWidget(QWidget):
         self.backgroundColor = '#E4E4E4'
         self.selectedColor = '#2CA7F8'
         self.rowHeight = 40
-        self.currentIndex = 0 #当前选择的项索引
+        self.currentIndex = -1 #当前选择的项索引
         self.listItems = []
+        self.chooseItems = []
         self.checkBoxList = []
         self.cursorIndex = -1 #当前光标所在位置的项索引
 
@@ -29,7 +30,7 @@ class NavigationWidget(QWidget):
         for i in range(len(items)):
             self.checkBoxList.append(QCheckBox(self))
             self.checkBoxList[i].move(40, self.rowHeight*i + 20)
-            self.checkBoxList[i].toggle()
+            #self.checkBoxList[i].toggle()
         self.update()
 
     def setBackgroundColor(self, color):
@@ -46,7 +47,7 @@ class NavigationWidget(QWidget):
 
     def setCurrentIndex(self, idx):
         self.currentIndex = idx
-        self.currentItemChanged.emit(idx, self.listItems[idx])
+        #self.currentItemChanged.emit(idx, self.listItems[idx])
         self.update()
 
     def paintEvent(self, evt):
@@ -88,10 +89,13 @@ class NavigationWidget(QWidget):
         idx = evt.y()/self.rowHeight
         if  idx< len(self.listItems):
             self.currentIndex = int(idx)
+            self.checkBoxList[self.currentIndex].toggle()
             self.currentItemChanged.emit(int(idx), self.listItems[int(idx)])
-            self.checkBoxList[self.cursorIndex].toggle()
             self.update()
 
     def leaveEvent(self, QEvent):
         self.cursorIndex = -1
         self.update()
+
+    def getChosedItems(self):
+        return self.chooseItems
