@@ -33,7 +33,7 @@ def fieldListToStr(fieldList):
     return fieldStr
 
 """
-        进行对比，并将对比结果保存起来（通过调用saveContrast）
+        根据备份版本进行对比，并将对比结果保存起来（通过调用saveContrast）
         输入：备份版本
         输入示例："3"
         输出：无

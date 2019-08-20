@@ -134,7 +134,7 @@ def getbackupVersionId():
     在backupInformation中插入备份信息
 """
 def insertBackupInformation(backupVersion,beginTime,endTime):
-    getDataSql = "select date(CURRENT_TIMESTAMP,'localtime');"
+    getDataSql = "select datetime(CURRENT_TIMESTAMP,'localtime');"
     curData = sqliteExecute(getDataSql)
     insertSql = "insert into backupInformation (backupVersion,backupTime,beginTime,endTime,hasContrast)values('%s','%s','%s','%s','%s') "%(backupVersion,curData,beginTime,endTime,0)
     sqliteExecute(insertSql)
