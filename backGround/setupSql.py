@@ -37,63 +37,60 @@ def tuplesToList(fetchTuples):
         获取功能指标列表
 """
 def getFunctionQuotaInfo():
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
+
     functionSql = "SELECT functionQuotaName FROM functionQuotaList where functionQuotaType=1"
     quotaSql = "SELECT functionQuotaName FROM functionQuotaList where functionQuotaType=2"
-    sqlite3Cursor.execute(functionSql)
-    functionList = sqlite3Cursor.fetchall()
-    functionList = tuplesToList(functionList)
-    sqlite3Cursor.execute(quotaSql)
-    quotaList = sqlite3Cursor.fetchall()
-    quotaList = tuplesToList(quotaList)
-    sqlite3Conn.close()
+
+    functionList = sqliteExecute(functionSql)
+
+
+    quotaList = sqliteExecute(quotaSql)
+
+
     return functionList,quotaList
 
 """
       获得模块列表
 """
 
-def getMoudleInfo():
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
-    sql = "SELECT moudleName FROM moudleList"
-    sqlite3Cursor.execute(sql)
-    moudleInfo = sqlite3Cursor.fetchall()
-    moudleInfo = tuplesToList(moudleInfo)
-    sqlite3Conn.close()
-    return moudleInfo
-print(getMoudleInfo())
+def getModuleInfo():
+    sql = "SELECT moduleName FROM moduleList"
+    moduleInfo = sqliteExecute(sql)
+
+
+    return moduleInfo
+print(getModuleInfo())
 
 """
       增加一个新模块
 """
 def insertModule(moduleName):
 
-    sql = "INSERT INTO ModuleList(moduleName,isSystemDefineModule) VALUES('%s',0);"%(moduleName)
+    sql = "INSERT INTO moduleList(moduleName,isSystemDefine) VALUES('%s',0);"%(moduleName)
     sqliteExecute(sql)
 """
       获得当前Oracle中所有表存储过程视图
 """
 
 def getOracleInfo():
-    oracleConn = getOrcaleConnection()
-    oracleCursor = oracleConn.cursor()
-    oracleCursor.execute("Select object_name From user_objects Where object_type='TABLE' ")
-    tableList = oracleCursor.fetchall()
-    tableList =  tuplesToList(tableList)
-    oracleCursor.execute("Select object_name From user_objects Where object_type='PROCEDURE' ")
-    produceList = oracleCursor.fetchall()
-    produceList =  tuplesToList(produceList)
-    oracleCursor.execute("Select object_name From user_objects Where object_type='VIEW' ")
-    viewList = oracleCursor.fetchall()
-    viewList =  tuplesToList(viewList)
+
+
+    tableList = oracleExcute("Select object_name From user_objects Where object_type='TABLE' ")
+
+
+    produceList = oracleExcute("Select object_name From user_objects Where object_type='PROCEDURE' ")
+
+
+
+    viewList = oracleExcute("Select object_name From user_objects Where object_type='VIEW' ")
+
+
     fieldDicts={}
     for table in tableList:
         fieldSql = "select COLUMN_NAME from USER_COL_COMMENTS where table_name = '%s'"%(table)
-        oracleCursor.execute(fieldSql)
-        fieldList = oracleCursor.fetchall()
-        fieldList = tuplesToList(fieldList)
+
+        fieldList = oracleExcute(fieldSql)
+
         fieldDicts[table]=fieldList
     return [tableList,produceList,viewList,fieldDicts]
 print(getOracleInfo())
@@ -102,25 +99,23 @@ print(getOracleInfo())
       获得所有配置信息
 """
 def getSetupList():
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
+
     moduleObjectSql = "select moduleName,objectName,objectType from moduleObject"
     print(moduleObjectSql)
-    sqlite3Cursor.execute(moduleObjectSql)
-    moudleObjects =sqlite3Cursor.fetchall()
-    moudleObjects = tuplesToList(moudleObjects)
-    if(len(moudleObjects)==0):
+
+    moduleObjects =sqliteExecute(moduleObjectSql)
+
+    if(len(moduleObjects)==0):
         return
-    for moduleObject in moudleObjects:
+    for moduleObject in moduleObjects:
         functionSql  = "select functionQuotaName from objectFunctionQuota where objectName = '%s' and objectType='%s' and functionQuotaType=1"%(moduleObject[1],moduleObject[2])
-        sqlite3Cursor.execute(functionSql)
-        result=sqlite3Cursor.fetchall()
-        result=tuplesToList(result)
+        result=sqliteExecute(functionSql)
+
+
         moduleObject.append(result)
         quotaSql  = "select functionQuotaName from objectFunctionQuota where objectName = '%s' and objectType='%s' and functionQuotaType=2"%(moduleObject[1],moduleObject[2])
-        sqlite3Cursor.execute(quotaSql)
-        result=sqlite3Cursor.fetchall()
-        result=tuplesToList(result)
+        result= sqliteExecute(quotaSql)
+
         moduleObject.append(result)
         if(moduleObject[2]==1):
             moduleObject[2]="表"
@@ -128,19 +123,16 @@ def getSetupList():
             moduleObject[2] = "存储过程"
         elif(moduleObject[2]==3):
             moduleObject[2]="视图"
-
-    sqlite3Cursor.close()
-    sqlite3Conn.close()
-    return moudleObjects
+    return moduleObjects
 print(getSetupList())
 
 """
       删除一个模块及关于此模块的配置的信息
 """
-def deleteMoudle(moudleName):
+def deleteModule(moduleName):
 
-    moduleObjectsql = "delete from moudleObject where moduleName = %s and isSystemDefine = 0 "%(moudleName)
-    modulesql = "delete from moudleList where moduleName = %s and isSystemDefine = 0 "%(moudleName)
+    moduleObjectsql = "delete from moduleObject where moduleName = '%s' and isSystemDefine = 0 "%(moduleName)
+    modulesql = "delete from moduleList where moduleName = '%s' and isSystemDefine = 0 "%(moduleName)
     sqliteExecute(moduleObjectsql)
     sqliteExecute(modulesql)
 
@@ -148,7 +140,7 @@ def deleteMoudle(moudleName):
 """
       删除一条配置信息
 """
-def deleteMoudleList(setupList):
+def deleteModuleList(setupList):
 
 
 
@@ -158,7 +150,7 @@ def deleteMoudleList(setupList):
         setupList[2] = 2
     elif (setupList[2] == "视图"):
         setupList[2] = 3
-    moduleObjectsql = "delete from moduleObject where moduleName = '%s' and objectName='%s' and objectType='%s' and isSystemDefine = '0' "%(setupList[0],setupList[1],setupList[2])
+    moduleObjectsql = "delete from moduleObject where moduleName = '%s' and objectName='%s' and objectType='%s' and isSystemDefine= '0' "%(setupList[0],setupList[1],setupList[2])
 
     sqliteExecute(moduleObjectsql)
 
@@ -167,21 +159,20 @@ def deleteMoudleList(setupList):
     需要输出的对象类型:type 1.表table 2.存储过程stored procedures 3.视图 view 
 """
 def getObjectByModule(moduleName):
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
+
     tableSql = "SELECT objectName FROM moduleObject WHERE type = 1 AND modulename = %s"%(moduleName)
     processSql = "SELECT objectName FROM moduleObject WHERE type = 2 AND modulename = %s"%(moduleName)
     viewSql = "SELECT objectName FROM moduleObject WHERE type = 3 AND modulename = %s"%(moduleName)
-    sqlite3Cursor.execute(tableSql)
-    tableName = sqlite3Cursor.fetchall()
-    tableName = tuplesToList(tableName)
-    sqlite3Cursor.execute(processSql)
-    processName = sqlite3Cursor.fetchall()
-    processName = tuplesToList(processName)
-    sqlite3Cursor.execute(viewSql)
-    viewName = sqlite3Cursor.fetchall()
-    viewName = tuplesToList(viewName)
-    sqlite3Conn.close()
+
+    tableName = sqliteExecute(tableSql)
+
+
+    processName = sqliteExecute(processSql)
+
+
+    viewName = sqliteExecute(viewSql)
+
+
     return tableName,processName,viewName
 
 
@@ -190,15 +181,13 @@ def getObjectByModule(moduleName):
        获得配置的表的主键和备份字段
 """
 def getbackupFieldKey(tableName):
-    sqlite3Conn = sqlite3.connect('test.db')
-    sqlite3Cursor = sqlite3Conn.cursor()
+
     fieldSql = 'SELECT fieldChosed from backupFieldKey where tableName = "%s" and fieldType = 1 '%(tableName)
     keySql = 'SELECT fieldChosed from backupFieldKey where tableName = "%s" and fieldType = 2'%(tableName)
-    sqlite3Cursor.execute(fieldSql)
-    fieldList = sqlite3Cursor.fetchall()
-    sqlite3Cursor.execute(keySql)
-    key = sqlite3Cursor.fetchall()
-    sqlite3Conn.close()
+    fieldList = sqliteExecute(fieldSql)
+
+    key = sqliteExecute(keySql)
+
     return fieldList,key
 
 
@@ -206,32 +195,29 @@ def getbackupFieldKey(tableName):
 # """
 #       接收新增的字典用于新增配置记录（给前端调用）
 # """
-def insertMoudleObjectsField(dicts1,dicts2):
+def insertModuleObjectsField(dicts1,dicts2):
     moduleName = dicts1.get('module')
     functionList = dicts1.get('function')
     quotaList = dicts1.get('quota')
     tableList = dicts1.get('table')
     processList = dicts1.get('process')
     viewList = dicts1.get('view')
-    sqliteConn = getSqliteConnection()
+
     """"
         新增配置关系
     """
     if len(tableList)!=0:
         for objectName in tableList:
             tableSql = "insert into moduleObject (moduleName,objectName,objectType,isSystemDefine) values ('%s','%s',1,0)"%(moduleName,objectName)
-            try:
-                sqliteConn.execute(tableSql)
-            except Exception as e:
-                print(e)
+            sqliteExecute(tableSql)
     if len(processList)!=0:
         for objectName in processList:
             processSql = "insert into moduleObject (moduleName,objectName,objectType,isSystemDefine) values ('%s','%s',1,0)"%(moduleName,objectName)
-            sqliteConn.execute(processSql)
+            sqliteExecute(processSql)
     if len(viewList)!=0:
         for objectName in viewList:
             viewSql = "insert into moduleObject (moduleName,objectName,objectType,isSystemDefine) values ('%s','%s',1,0)"%(moduleName,objectName)
-            sqliteConn.execute(viewSql)
+            sqliteExecute(viewSql)
 
     """
         新增备份字段与对比主键 
@@ -243,11 +229,12 @@ def insertMoudleObjectsField(dicts1,dicts2):
             for backupFiled in backupFileds:
                 fieldSql = "insert into backupFieldKey (tableName,fieldChosed,fieldType,isSystemDefine) values " \
                            "('%s','%s',1,0)" % (table, backupFiled)
-                sqliteConn.execute(fieldSql)
+                sqliteExecute(fieldSql)
             for backupFiled in keyFields:
                 keySql = "insert into backupFieldKey (tableName,fieldChosed,fieldType,isSystemDefine) values " \
                          "('%s','%s',2,0)" % (table, backupFiled)
-    sqliteConn.commit()
+                sqliteExecute(keySql)
+
     """
            新增functionQuota与object对应
     """
@@ -262,8 +249,8 @@ def insertMoudleObjectsField(dicts1,dicts2):
     #         sqliteConn.execute(keySql)
 
 
-returnDict = {'module': '模块1', 'function': [], 'quota': [], 'process': [], 'view': [], 'table': ['COURSE']}
-returnTableDict = {'COURSE': {'key': ['CNAME'], 'field': ['CNO', 'TNO', 'CNAME']}}
-print(insertMoudleObjectsField(returnDict,returnTableDict))
+# returnDict = {'module': '模块1', 'function': [], 'quota': [], 'process': [], 'view': [], 'table': ['COURSE']}
+# returnTableDict = {'COURSE': {'key': ['CNAME'], 'field': ['CNO', 'TNO', 'CNAME']}}
+# print(insertModuleObjectsField(returnDict,returnTableDict))
 
 

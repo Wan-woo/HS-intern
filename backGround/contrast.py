@@ -11,7 +11,7 @@
 '''
 from backGround.backupSql import getBackupTime,getObjectByVersion
 from backGround.setupSql import tuplesToList
-from backGround.testConnection import getSqliteConnection,getOrcaleConnection
+from backGround.testConnection import getSqliteConnection,getOrcaleConnection,sqliteExecute,oracleExcute
 def fieldListToStr(fieldList):
     fieldStr=""
     for index in range(len(fieldList)):
@@ -20,12 +20,11 @@ def fieldListToStr(fieldList):
             fieldStr+=','
     return fieldStr
 def makeContrasr(backupVersion):
-    [beginTime,endTime]=getBackupTime(backupVersion)
+    [[beginTime,endTime],]=getBackupTime(backupVersion)
     objectList = getObjectByVersion(backupVersion)
     tableList = []
     backupTableList = []
-    sqliteConn = getSqliteConnection()
-    sqliteCursor = sqliteConn.cursor()
+
     for object in objectList:
         if object[1]==1:
             tableList.append(object[0])
@@ -33,12 +32,12 @@ def makeContrasr(backupVersion):
     for index in range(len(tableList)):
         keySql = "select fieldChosed from backupFieldKey where tableName = '%s' and fieldType = 2 "%(tableList[index])
         fieldSql = "select fieldChosed from backupFieldKey where tableName = '%s' "%(tableList[index])
-        sqliteCursor.execute(keySql)
-        keyList = sqliteCursor.fetchall()
-        keyList = tuplesToList(keyList)
+
+        keyList = sqliteExecute(keySql)
         keyStr = fieldListToStr(keyList)
-        sqliteCursor.execute(fieldSql)
-        fieldList = tuplesToList(sqliteCursor.fetchall())
+
+        fieldList = sqliteExecute(fieldSql)
+
         fieldStr = fieldListToStr(fieldList)
 
         deleteSql = 'select %s from %s MINUS select %s from %s where FDATE BETWEEN %s  AND %s'%(keyStr,tableList[index],keyStr,backupTableList[index],beginTime,endTime)
@@ -46,24 +45,24 @@ def makeContrasr(backupVersion):
         sameSql = 'select %s from (select %s from %s intersect select %s from %s where FDATE BETWEEN %s  AND %s)'%(keyStr,fieldStr,tableList[index],fieldStr,backupTableList[index],beginTime,endTime)
         updateSql = '(select %s from %s intersect select %s from %s where FDATE BETWEEN %s  AND %s)minus ' \
                     '(select %s from (%s))'%(keyStr,tableList[index],keyStr,backupTableList[index],beginTime,endTime,keyStr,sameSql)
-        oracleConn = getOrcaleConnection()
-        oracleCursor = oracleConn.cursor()
 
-        oracleCursor.execute(deleteSql)
-        deleteList = oracleCursor.fetchall()
-        deleteList = tuplesToList(deleteList)
 
-        oracleCursor.execute(insertSql)
-        insertList = oracleCursor.fetchall()
-        insertList = tuplesToList(insertList)
+        deleteList = oracleExcute(deleteSql)
+        insertList = oracleExcute(insertSql)
+        sameList = oracleExcute(sameSql)
+        updateList = oracleExcute(updateSql)
 
-        oracleCursor.execute(sameSql)
-        sameList = oracleCursor.fetchall()
-        sameList = tuplesToList(sameList)
+        getRecordSql = "select MAX(recordId) from CONTRASTRESULTS"
+        id = oracleExcute(getRecordSql)[0]
+        if id==None:
+            id=0
+        else:
+            id+=1
+        print(id)
+        for deleteRecord in deleteList:
+            insertResultSql = "insert into contrastResults(backupObjectName,recordId,primaryKeyName,primaryKeyId,differenceType)" \
+                          "values ('%s','%s','%s','%s','%s')"%(tableList[index],recordId,primaryKeyName,primaryKeyId,"1")
 
-        oracleCursor.execute(updateSql)
-        updateList = oracleCursor.fetchall()
-        updateList = tuplesToList(updateList)
         print(updateSql)
     return deleteList,insertList,sameList,updateList
 contrasrList = makeContrasr(5)

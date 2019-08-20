@@ -51,7 +51,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         # 加载匹配项
         self.functionList = getFunctionQuotaInfo()[0]
         self.quotaList = getFunctionQuotaInfo()[1]
-        self.moduleList = getMoudleInfo()
+        self.moduleList = getModuleInfo()
         print(getOracleInfo())
         self.tableList = getOracleInfo()[0]
         self.processList = getOracleInfo()[1]
@@ -59,7 +59,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.fieldTableDict = getOracleInfo()[3]
         self.setupList = getSetupList()
         # 加载
-        self.chooseComboBox.addItems(getMoudleInfo())
+        self.chooseComboBox.addItems(getModuleInfo())
         # 加载被选择列表
         self.processChooseList = []
         self.viewChooseList = []
@@ -113,7 +113,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         for i in range(self.setupTable.rowCount()):
             if self.setupTable.cellWidget(i, 0).isChecked():
                 print(','.join([self.setupTable.item(i,1).text(), self.setupTable.item(i,2).text(), self.setupTable.item(i,3).text()]))
-                deleteMoudleList([self.setupTable.item(i,1).text(), self.setupTable.item(i,2).text(), self.setupTable.item(i,3).text()])
+                deleteModuleList([self.setupTable.item(i,1).text(), self.setupTable.item(i,2).text(), self.setupTable.item(i,3).text()])
         self.loadData()
         pass
 
@@ -133,7 +133,7 @@ class SetupPage(modelPage.Ui_MainWindow):
     def delModuleBtn_clicked(self):
         moduleName = self.delModuleLineText.currentText()
         print(moduleName)
-        deleteMoudle(moduleName)
+        deleteModule(moduleName)
         print('yes')
         pass
 
@@ -279,7 +279,7 @@ class SetupPage(modelPage.Ui_MainWindow):
             self.returnTableDict[tableName] = self.tempReturnDict[tableName]
         print(self.returnDict)
         print(self.returnTableDict)
-        insertMoudleObjectsField(self.returnDict, self.returnTableDict)
+        insertModuleObjectsField(self.returnDict, self.returnTableDict)
         # 立刻返回
         self.addSetupFrame.deleteLater()
         self.setAddSetupFrame()
@@ -316,7 +316,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.delModuleLineLayout = QHBoxLayout()
         self.delModuleLineLable = QLabel('请选择删除模块名')
         self.delModuleLineText = QComboBox()
-        self.delModuleLineText.addItems(getMoudleInfo())
+        self.delModuleLineText.addItems(getModuleInfo())
         self.delModuleLineText.setFixedWidth(150)
         self.delModuleLineLayout.addWidget(self.delModuleLineLable)
         self.delModuleLineLayout.addWidget(self.delModuleLineText)
