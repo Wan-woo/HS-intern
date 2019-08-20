@@ -169,7 +169,7 @@ class BackupPage(modelPage.Ui_MainWindow):
 
         # 设置一个备份按钮
         self.submitBtn = QPushButton('备份')
-
+        self.submitBtn.clicked.connect(self.submitBtn_clicked)
 
         # 设置一个返回按钮
         self.returnBtn = QPushButton('返回')
@@ -193,6 +193,20 @@ class BackupPage(modelPage.Ui_MainWindow):
         self.loadData()
         self.checkBackupFrame.setVisible(True)
 
+    def submitBtn_clicked(self):
+        tableList = []
+        processList = []
+        viewList = []
+        for item in [[self.tableTable, tableList], [self.processTable, processList], [self.viewTable, viewList]]:
+            table = item[0]
+            list = item[1]
+            for i in range(table.rowCount()):
+                if table.cellWidget(i, 0).isChecked():
+                    list.append(table.item(i, 1).text())
+            print(list)
+
+
+
     def navigationWidget_currentItemChanged(self):
         self.chooseModule = []
         for index, checkBox in enumerate(self.navigationWidget.checkBoxList):
@@ -205,6 +219,7 @@ class BackupPage(modelPage.Ui_MainWindow):
             self.chooseTable.append(getObjectByModule(module)[0])
             self.chooseProcess.append(getObjectByModule(module)[1])
             self.chooseView.append(getObjectByModule(module)[2])
+        print(self.chooseTable)
         for item in [[self.chooseTable, self.tableTable], [self.chooseProcess, self.processTable], [self.chooseView, self.viewTable]]:
             chooseList = item[0]
             table = item[1]
