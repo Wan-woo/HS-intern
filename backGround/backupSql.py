@@ -66,22 +66,19 @@ def tuplesToList(fetchTuples):
 """
 def getBackupInfomation():
     checkSystemDb()
-
-
     backInformationList = sqliteExecute("select backupVersion,backupTime from backupInformation")
-
-
     return backInformationList
 
 
 """
       创建新的备份
 """
-def createBackupTable(timeList,tableList,processList,viewList):
+def createNewBackup(timeList,tableList,processList,viewList):
     backupVersionId = getbackupVersionId()
     createBackupTable(timeList[0],timeList[1],tableList,backupVersionId)
     # createProcess(processList,backupVersionId)
     # createView(viewList,backupVersionId)
+    insertBackupInformation(backupVersionId,timeList[0],timeList[1])
 
 
 
@@ -102,7 +99,7 @@ def getBackupTime(backupVersion):
 def getObjectByVersion(backupVersion):
 
     sql = "SELECT objectName,objectType,backupObjectName FROM backupObjectNameList WHERE backupVersion =%s "%(backupVersion)
-    objectList =     sqliteExecute(sql)
+    objectList = sqliteExecute(sql)
     return objectList
 print(getObjectByVersion("1"))
 
@@ -133,7 +130,14 @@ def getbackupVersionId():
         backupVersion = versionList[0] + 1
 
     return backupVersion
-
+"""
+    在backupInformation中插入备份信息
+"""
+def insertBackupInformation(backupVersion,beginTime,endTime):
+    getDataSql = "select date(CURRENT_TIMESTAMP,'localtime');"
+    curData = sqliteExecute(getDataSql)
+    insertSql = "insert into backupInformation (backupVersion,backupTime,beginTime,endTime,hasContrast)values('%s','%s','%s','%s','%s') "%(backupVersion,curData,beginTime,endTime,0)
+    sqliteExecute(insertSql)
 """
         通过类型筛选查询对象
     需要输出的对象类型:type 1.表table 2.存储过程stored procedures 3.视图 view 
