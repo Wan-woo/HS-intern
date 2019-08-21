@@ -15,24 +15,65 @@ from backGround.testConnection import getSqliteConnection,getOrcaleConnection,sq
 import cx_Oracle
 
 
+
+"""         
+        将列表类型的字段转换成sql中字段的字符串格式
+        输入：[字段1，字段2]
+        输出："字段1，字段2"
 """
-        根据表名与类型查询对比结果，类型：1.删除 (del) 2.新增(insert) 3.相同(same) 4.更改(update) 5.不同（different）6.全部(all)
+def fieldListToStr(fieldList):
+    fieldStr=""
+    for index in range(len(fieldList)):
+        fieldStr+=fieldList[index]
+        if len(fieldList)-1>index:
+            fieldStr+=','
+    return fieldStr
+
+"""
+        根据表名与类型查询主键，类型：1.删除 (del) 2.新增(insert) 3.相同(same) 4.更改(update) 5.不同（different）6.全部(all)
             分页
 """
-def getResultByTableNameAndType(tableName,type):
-    baseSql  = "select * from contrastResults where BACKUPOBJECTNAME = %s "%(tableName)
-    if str(type)==1:
-        endSql = baseSql+"and DIFFERENCETYPE = '1'"
-    elif str(type)==2:
-        endSql = baseSql+"and DIFFERENCETYPE = '2'"
-    elif str(type)==3:
-        endSql = baseSql+"and DIFFERENCETYPE = '3'"
-    elif str(type)==4:
-        endSql = baseSql+"and DIFFERENCETYPE = '4'"
-    elif str(type)==5:
-        endSql = baseSql+"and DIFFERENCETYPE = '2' or DIFFERENCETYPE = '1' or DIFFERENCETYPE = '4' "
-    elif str(type)==2:
-        endSql = baseSql
+def getKeysByTableNameAndType(tableName,type,beginId,endId):
+
+
+    baseSqlPre  = "SELECT * FROM (SELECT ROWNUM AS rowno, t.PRIMARYKEYVALUE FROM CONTRASTRESULTS t WHERE BACKUPOBJECTNAME = '%s' "%(tableName)
+    baseSqlEnd  =  "AND ROWNUM <= %s) table_alias WHERE table_alias.rowno >= %s"%(endId,beginId)
+    if str(type)=='1':
+        resultSql = baseSqlPre+"and DIFFERENCETYPE = 1 "+baseSqlEnd
+    elif str(type)=='2':
+        resultSql = baseSqlPre+"and DIFFERENCETYPE = 2 "+baseSqlEnd
+    elif str(type)=='3':
+        resultSql = baseSqlPre+"and DIFFERENCETYPE = 3 "+baseSqlEnd
+    elif str(type)=='4':
+        resultSql = baseSqlPre+"and DIFFERENCETYPE = 4 "+baseSqlEnd
+    elif str(type)=='5':
+        resultSql = baseSqlPre+"and DIFFERENCETYPE = 2 or DIFFERENCETYPE = 1 or DIFFERENCETYPE = 4 "+baseSqlEnd
+    else:
+        resultSql = baseSqlPre+baseSqlEnd
+
+    getList = oracleExcute(resultSql)
+
+    return getList
+
+
+
+
+def getContrastData(tableName,type,pageNum):
+    recordPerPage = 30
+    [fieldList,keyList] = getbackupFieldKey(tableName)
+    fieldStr = fieldListToStr(fieldList)
+    keyNum = len(keyList)
+    beginId = (pageNum-1)*recordPerPage*keyNum
+    endId = pageNum*recordPerPage*keyNum
+    resultList = getKeysByTableNameAndType(tableName,type,beginId,endId)
+    keyDataList = []
+    for i in range(30):
+        subList = []
+        for j in range(keyNum):
+            subList.append(resultList[i * keyNum + j][1])
+        keyDataList.append(subList)
+
+print(getContrastData('S_FA_YSS_GZB',3,1))
 
 
 """
@@ -60,7 +101,7 @@ def getDiffNumByTableName(tableName):
 """
     获取当前对比内容信息
 """
-def getCurContrasr():
+def getCurContrasrInfo():
     getCurConSql = "select backupVersion from backupInformation where hasContrast = 1 "
     curBackupVersion = sqliteExecute(getCurConSql)[0]
     if len(curBackupVersion)==0:
@@ -92,18 +133,7 @@ def getCurContrasr():
 print(getCurContrasr())
 
 
-"""         
-        将列表类型的字段转换成sql中字段的字符串格式
-        输入：[字段1，字段2]
-        输出："字段1，字段2"
-"""
-def fieldListToStr(fieldList):
-    fieldStr=""
-    for index in range(len(fieldList)):
-        fieldStr+=fieldList[index]
-        if len(fieldList)-1>index:
-            fieldStr+=','
-    return fieldStr
+
 
 """
         根据备份版本进行对比，并将对比结果保存起来（通过调用saveContrast）
