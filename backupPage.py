@@ -218,6 +218,9 @@ class BackupPage(modelPage.Ui_MainWindow):
         startTime = self.yearComboBox1.currentText() + self.monthComboBox1.currentText().rjust(2, '0') + self.dayComboBox1.currentText().rjust(2, '0')
         endTime = self.yearComboBox2.currentText() + self.monthComboBox2.currentText().rjust(2, '0') + self.dayComboBox2.currentText().rjust(2, '0')
         createNewBackup([startTime, endTime], tableList, processList, viewList)
+        # 显示备份成功的信息
+        QMessageBox.question(self, 'Message', "备份成功", QMessageBox.Yes, QMessageBox.Yes)
+        self.returnBtn_clicked()
 
     def compareBtn_clicked(self):
         # 使用QButtonGroup提供的函数更高效
@@ -236,6 +239,7 @@ class BackupPage(modelPage.Ui_MainWindow):
         self.chooseProcess = []
         self.chooseView = []
         for module in self.chooseModule:
+            print(getObjectByModule(module)[0])
             self.chooseTable.extend(getObjectByModule(module)[0])
             self.chooseProcess.extend(getObjectByModule(module)[1])
             self.chooseView.extend(getObjectByModule(module)[2])
