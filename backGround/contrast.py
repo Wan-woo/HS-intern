@@ -33,24 +33,63 @@ def getResultByTableNameAndType(tableName,type):
         endSql = baseSql+"and DIFFERENCETYPE = '2' or DIFFERENCETYPE = '1' or DIFFERENCETYPE = '4' "
     elif str(type)==2:
         endSql = baseSql
+
+
 """
     根据表名获取不同差异类型的个数
     输入格式 表名  示例  'S_FA_YSS_GZB'
-    返回格式 一维数字列表 示例 [0, 0, 16444, 0]
-    
-"""
-def getDiffNumByTableName(tableName):
+    返回格式 一维数字列表 示例 [0, 0, 16444, 0] 依次代表 删除 (del) 新增(insert) 相同(same) 更改(update)
 
+"""
+
+
+def getDiffNumByTableName(tableName):
     keyList = getbackupFieldKey(tableName)[1]
     keyNum = len(keyList)
-    if(keyNum==0):
-        return [0,0,0,0]
+    if (keyNum == 0):
+        return [0, 0, 0, 0]
     else:
         returnNums = []
         for i in range(4):
-            searchSql = "select count(*) from contrastResults where BACKUPOBJECTNAME = '%s' and DIFFERENCETYPE = %s"%(tableName,str(i+1))
-            returnNums.append(oracleExcute(searchSql)[0][0]//keyNum)
+            searchSql = "select count(*) from contrastResults where BACKUPOBJECTNAME = '%s' and DIFFERENCETYPE = %s" % (
+            tableName, str(i + 1))
+            returnNums.append(oracleExcute(searchSql)[0][0] // keyNum)
     return returnNums
+
+
+"""
+    获取当前对比内容信息
+"""
+def getCurContrasr():
+    getCurConSql = "select backupVersion from backupInformation where hasContrast = 1 "
+    curBackupVersion = sqliteExecute(getCurConSql)[0]
+    if len(curBackupVersion)==0:
+        return []
+    curBackupVersion = curBackupVersion[0]
+
+    tableSql = "Select objectName From backupObjectNameList Where objectType=1 and backupVersion = '%s' "%(curBackupVersion)
+    tableList = sqliteExecute(tableSql)
+    tableList = listsToList(tableList)
+
+    produceSql = "Select objectName From backupObjectNameList Where objectType=2 and backupVersion = '%s' "%(curBackupVersion)
+    produceList = sqliteExecute(produceSql)
+    produceList = listsToList(produceList)
+
+    viewSql = "Select objectName From backupObjectNameList Where objectType=3 and backupVersion = '%s' "%(curBackupVersion)
+    viewList = sqliteExecute(viewSql)
+    viewList = listsToList(viewList)
+
+    fieldDicts = {}
+    for table in tableList:
+        fieldList = getbackupFieldKey(table)[0]
+        fieldDicts[table] = fieldList
+    resultDicts = {}
+    for table in tableList:
+        resultList = getDiffNumByTableName(table)
+        resultDicts[table] = resultList
+    return [tableList, produceList, viewList, fieldDicts,resultDicts]
+
+print(getCurContrasr())
 
 
 """         

@@ -46,10 +46,10 @@ def getFunctionQuotaInfo():
     quotaSql = "SELECT functionQuotaName FROM functionQuotaList where functionQuotaType=2"
 
     functionList = sqliteExecute(functionSql)
-
+    functionList = listsToList(functionList)
 
     quotaList = sqliteExecute(quotaSql)
-
+    quotaList = listsToList(quotaList)
 
     return functionList,quotaList
 
@@ -185,7 +185,7 @@ def getObjectByModule(moduleName):
 
     return tableName,processName,viewName
 
-print(getObjectByModule("模块1"))
+
 
 """
        获得配置的表的主键和备份字段
@@ -198,8 +198,8 @@ def getbackupFieldKey(tableName):
     fieldList = listsToList(fieldList)
     keyList = sqliteExecute(keySql)
     keyList = listsToList(keyList)
-    return fieldList,keyList
-
+    return [fieldList,keyList]
+print(getbackupFieldKey("S_FA_YSS_GZB"))
 
 
 # """
