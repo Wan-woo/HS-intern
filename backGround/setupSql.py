@@ -175,13 +175,13 @@ def getObjectByModule(moduleName):
     viewSql = "SELECT objectName FROM moduleObject WHERE objectType = '3' AND modulename = '%s'"%(moduleName)
 
     tableName = sqliteExecute(tableSql)
-
+    tableName = listsToList(tableName)
 
     processName = sqliteExecute(processSql)
-
+    processName = listsToList(processName)
 
     viewName = sqliteExecute(viewSql)
-
+    viewName = listsToList(viewName)
 
     return tableName,processName,viewName
 

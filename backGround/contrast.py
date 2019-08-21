@@ -10,7 +10,7 @@
 @returnParam:
 '''
 from backGround.backupSql import getBackupTime,getObjectByVersion,listsToList
-from backGround.setupSql import changeCurContrast
+from backGround.setupSql import changeCurContrast,getbackupFieldKey
 from backGround.testConnection import getSqliteConnection,getOrcaleConnection,sqliteExecute,oracleExcute,oracleNoFetch
 import cx_Oracle
 
@@ -33,8 +33,27 @@ def getResultByTableNameAndType(tableName,type):
         endSql = baseSql+"and DIFFERENCETYPE = '2' or DIFFERENCETYPE = '1' or DIFFERENCETYPE = '4' "
     elif str(type)==2:
         endSql = baseSql
-
 """
+    根据表名获取不同差异类型的个数
+    输入格式 表名  示例  'S_FA_YSS_GZB'
+    返回格式 一维数字列表 示例 [0, 0, 16444, 0]
+    
+"""
+def getDiffNumByTableName(tableName):
+
+    keyList = getbackupFieldKey(tableName)[1]
+    keyNum = len(keyList)
+    if(keyNum==0):
+        return [0,0,0,0]
+    else:
+        returnNums = []
+        for i in range(4):
+            searchSql = "select count(*) from contrastResults where BACKUPOBJECTNAME = '%s' and DIFFERENCETYPE = %s"%(tableName,str(i+1))
+            returnNums.append(oracleExcute(searchSql)[0][0]//keyNum)
+    return returnNums
+
+
+"""         
         将列表类型的字段转换成sql中字段的字符串格式
         输入：[字段1，字段2]
         输出："字段1，字段2"
@@ -68,16 +87,12 @@ def makeContrasr(backupVersion):
         tableList.append(object[0])
         backupTableList.append('backup'+str(object[1]))
     for index in range(len(tableList)):
-        keySql = "select fieldChosed from backupFieldKey where tableName = '%s' and fieldType = 2 "%(tableList[index])
-        fieldSql = "select fieldChosed from backupFieldKey where tableName = '%s' and fieldType = 1"%(tableList[index])
 
-        keyList = sqliteExecute(keySql)
-        keyList = listsToList(keyList)
-        keyStr = fieldListToStr(keyList)
+        [fieldList,keyList] = getbackupFieldKey(tableList[index])
 
-        fieldList = sqliteExecute(fieldSql)
-        fieldList = listsToList(fieldList)
+
         fieldStr = fieldListToStr(fieldList)
+        keyStr = fieldListToStr(keyList)
 
         # deleteSql = 'select %s from %s MINUS select %s from %s where FDATE BETWEEN %s  AND %s'%(keyStr,tableList[index],keyStr,backupTableList[index],beginTime,endTime)
         # insertSql = 'select %s from %s MINUS select %s from %s where FDATE BETWEEN %s  AND %s'%(keyStr,backupTableList[index],keyStr,tableList[index],beginTime,endTime)
