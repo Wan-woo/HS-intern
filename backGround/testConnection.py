@@ -19,7 +19,7 @@ import backGround.globalConn as gC
 """
 def tuplesToList(fetchTuples):
     returnList = []
-    if(len(fetchTuples)==0):
+    if((fetchTuples==None)|(len(fetchTuples)==0)):
         return []
 
     for subTuple in fetchTuples:
@@ -72,6 +72,7 @@ def sqliteExecute(sql):
     except sqlite3.Error as errmsg:
         print(errmsg)
         print(sql)
+        return []
 # 测试语句 第一条正常 第二条报错
 # print(connectOracle('faisdb','faisdb','192.168.36.244','fais'))
 # print(connectOracle('faisdb','faisdb','192.168.36.244','fais1'))
@@ -80,6 +81,7 @@ def oracleExcute(sql):
     try:
         oracleCursor = oracleConn.cursor()
         oracleCursor.execute(sql)
+        print(sql)
         returnList = oracleCursor.fetchall()
         oracleConn.commit()
         returnList = tuplesToList(returnList)
@@ -87,13 +89,15 @@ def oracleExcute(sql):
     except cx_Oracle.DatabaseError as errmsg:
         print(errmsg)
         print(sql)
+        return []
 def oracleNoFetch(sql):
     oracleConn = getOrcaleConnection()
     try:
         oracleCursor = oracleConn.cursor()
         oracleCursor.execute(sql)
+        print(sql)
         oracleConn.commit()
     except cx_Oracle.DatabaseError as errmsg:
         print(errmsg)
         print(sql)
-
+        return []

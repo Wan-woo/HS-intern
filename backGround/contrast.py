@@ -9,18 +9,30 @@
 @inputParam:
 @returnParam:
 '''
-from backGround.backupSql import getBackupTime,getObjectByVersion
+from backGround.backupSql import getBackupTime,getObjectByVersion,listsToList
 from backGround.setupSql import changeCurContrast
 from backGround.testConnection import getSqliteConnection,getOrcaleConnection,sqliteExecute,oracleExcute,oracleNoFetch
 import cx_Oracle
 
 
 """
-        根据表名与类型查询对比结果，类型：1.删除 del 2.新增 3.相同 4.不同
+        根据表名与类型查询对比结果，类型：1.删除 (del) 2.新增(insert) 3.相同(same) 4.更改(update) 5.不同（different）6.全部(all)
+            分页
 """
-# def getResultByTableName(tableName):
-
-
+def getResultByTableNameAndType(tableName,type):
+    baseSql  = "select * from contrastResults where BACKUPOBJECTNAME = %s "%(tableName)
+    if str(type)==1:
+        endSql = baseSql+"and DIFFERENCETYPE = '1'"
+    elif str(type)==2:
+        endSql = baseSql+"and DIFFERENCETYPE = '2'"
+    elif str(type)==3:
+        endSql = baseSql+"and DIFFERENCETYPE = '3'"
+    elif str(type)==4:
+        endSql = baseSql+"and DIFFERENCETYPE = '4'"
+    elif str(type)==5:
+        endSql = baseSql+"and DIFFERENCETYPE = '2' or DIFFERENCETYPE = '1' or DIFFERENCETYPE = '4' "
+    elif str(type)==2:
+        endSql = baseSql
 
 """
         将列表类型的字段转换成sql中字段的字符串格式
@@ -46,6 +58,7 @@ def makeContrasr(backupVersion):
     oracleNoFetch(truncateSql)
 
     [[beginTime,endTime],]=getBackupTime(backupVersion)
+
     tableAndBackupList = getObjectByVersion(backupVersion)[0]
 
     tableList = []
@@ -53,22 +66,29 @@ def makeContrasr(backupVersion):
 
     for object in tableAndBackupList:
         tableList.append(object[0])
-        backupTableList.append(object[1])
+        backupTableList.append('backup'+str(object[1]))
     for index in range(len(tableList)):
         keySql = "select fieldChosed from backupFieldKey where tableName = '%s' and fieldType = 2 "%(tableList[index])
-        fieldSql = "select fieldChosed from backupFieldKey where tableName = '%s' "%(tableList[index])
+        fieldSql = "select fieldChosed from backupFieldKey where tableName = '%s' and fieldType = 1"%(tableList[index])
 
         keyList = sqliteExecute(keySql)
+        keyList = listsToList(keyList)
         keyStr = fieldListToStr(keyList)
 
         fieldList = sqliteExecute(fieldSql)
+        fieldList = listsToList(fieldList)
         fieldStr = fieldListToStr(fieldList)
 
-        deleteSql = 'select %s from %s MINUS select %s from %s where FDATE BETWEEN %s  AND %s'%(keyStr,tableList[index],keyStr,backupTableList[index],beginTime,endTime)
-        insertSql = 'select %s from %s MINUS select %s from %s where FDATE BETWEEN %s  AND %s'%(keyStr,backupTableList[index],keyStr,tableList[index],beginTime,endTime)
-        sameSql = 'select %s from (select %s from %s intersect select %s from %s where FDATE BETWEEN %s  AND %s)'%(keyStr,fieldStr,tableList[index],fieldStr,backupTableList[index],beginTime,endTime)
-        updateSql = '(select %s from %s intersect select %s from %s where FDATE BETWEEN %s  AND %s)minus ' \
-                    '(select %s from (%s))'%(keyStr,tableList[index],keyStr,backupTableList[index],beginTime,endTime,keyStr,sameSql)
+        # deleteSql = 'select %s from %s MINUS select %s from %s where FDATE BETWEEN %s  AND %s'%(keyStr,tableList[index],keyStr,backupTableList[index],beginTime,endTime)
+        # insertSql = 'select %s from %s MINUS select %s from %s where FDATE BETWEEN %s  AND %s'%(keyStr,backupTableList[index],keyStr,tableList[index],beginTime,endTime)
+        # sameSql = 'select %s from (select %s from %s intersect select %s from %s where FDATE BETWEEN %s  AND %s)'%(keyStr,fieldStr,tableList[index],fieldStr,backupTableList[index],beginTime,endTime)
+        # updateSql = '(select %s from %s intersect select %s from %s where FDATE BETWEEN %s  AND %s)minus ' \
+        #             '(select %s from (%s))'%(keyStr,tableList[index],keyStr,backupTableList[index],beginTime,endTime,keyStr,sameSql)
+        deleteSql = 'select %s from %s MINUS select %s from %s '%(keyStr,tableList[index],keyStr,backupTableList[index])
+        insertSql = 'select %s from %s MINUS select %s from %s '%(keyStr,backupTableList[index],keyStr,tableList[index])
+        sameSql = 'select %s from (select %s from %s intersect select %s from %s )'%(keyStr,fieldStr,tableList[index],fieldStr,backupTableList[index])
+        updateSql = '(select %s from %s intersect select %s from %s )minus ' \
+                    '(select %s from (%s))'%(keyStr,tableList[index],keyStr,backupTableList[index],keyStr,sameSql)
 
         deleteList = oracleExcute(deleteSql)
         insertList = oracleExcute(insertSql)
@@ -85,14 +105,14 @@ def makeContrasr(backupVersion):
 """
 def saveContrast(tableName,keyList,deleteList,insertList,sameList,updateList):
     getRecordSql = "select MAX(recordId) from CONTRASTRESULTS"
-    recordId = oracleExcute(getRecordSql)[0]
+    recordId = oracleExcute(getRecordSql)[0][0]
     if recordId==None:
         recordId=0
     else:
-        recordId+=1
+        recordId=recordId+1
 
     getIdSql = "select MAX(ID) from CONTRASTRESULTS"
-    id = oracleExcute(getIdSql)[0]
+    id = oracleExcute(getIdSql)[0][0]
     if id==None:
         id=0
     else:
@@ -100,39 +120,40 @@ def saveContrast(tableName,keyList,deleteList,insertList,sameList,updateList):
     oracleConn = getOrcaleConnection()
     oracleCursor = oracleConn.cursor()
     try:
-        recordType = "1"
-        for record in deleteList:
-            for keyIndex in range(len(keyList)):
-                insertResultSql = "insert into contrastResults values('%s','%s','%s','%s','%s','%s')"%(id,tableName,recordId,keyList[keyIndex],record[keyIndex],recordType)
-                oracleCursor.execute(insertResultSql)
-                id+=1
-            recordId+=1
+        if deleteList!=None:
+            recordType = "1"
+            for record in deleteList:
+                for keyIndex in range(len(keyList)):
+                    insertResultSql = "insert into contrastResults values('%s','%s','%s','%s','%s','%s')"%(id,tableName,recordId,keyList[keyIndex],record[keyIndex],recordType)
+                    oracleCursor.execute(insertResultSql)
+                    id+=1
+                recordId+=1
+        if insertList != None:
+            recordType = "2"
+            for record in insertList:
+                for keyIndex in range(len(keyList)):
+                    insertResultSql = "insert into contrastResults values('%s','%s','%s','%s','%s','%s')"%(id,tableName,recordId,keyList[keyIndex],record[keyIndex],recordType)
+                    oracleCursor.execute(insertResultSql)
+                    id+=1
+                recordId+=1
+        if sameList != None:
+            recordType = "3"
+            for record in sameList:
 
-        recordType = "2"
-        for record in insertList:
-            for keyIndex in range(len(keyList)):
-                insertResultSql = "insert into contrastResults values('%s','%s','%s','%s','%s','%s')"%(id,tableName,recordId,keyList[keyIndex],record[keyIndex],recordType)
-                oracleCursor.execute(insertResultSql)
-                id+=1
-            recordId+=1
+                for keyIndex in range(len(keyList)):
+                    insertResultSql = "insert into contrastResults values('%s','%s','%s','%s','%s','%s')"%(id,tableName,recordId,keyList[keyIndex],record[keyIndex],recordType)
+                    oracleCursor.execute(insertResultSql)
+                    id+=1
+                recordId+=1
+        if updateList != None:
+            recordType = "4"
+            for record in updateList:
 
-        recordType = "3"
-        for record in sameList:
-
-            for keyIndex in range(len(keyList)):
-                insertResultSql = "insert into contrastResults values('%s','%s','%s','%s','%s','%s')"%(id,tableName,recordId,keyList[keyIndex],record[keyIndex],recordType)
-                oracleCursor.execute(insertResultSql)
-                id+=1
-            recordId+=1
-
-        recordType = "4"
-        for record in updateList:
-
-            for keyIndex in range(len(keyList)):
-                insertResultSql = "insert into contrastResults values('%s','%s','%s','%s','%s','%s')"%(id,tableName,recordId,keyList[keyIndex],record[keyIndex],recordType)
-                oracleCursor.execute(insertResultSql)
-                id+=1
-            recordId+=1
+                for keyIndex in range(len(keyList)):
+                    insertResultSql = "insert into contrastResults values('%s','%s','%s','%s','%s','%s')"%(id,tableName,recordId,keyList[keyIndex],record[keyIndex],recordType)
+                    oracleCursor.execute(insertResultSql)
+                    id+=1
+                recordId+=1
         # print(updateSql)
     except cx_Oracle.DatabaseError as Err:
         print(Err)
@@ -141,7 +162,7 @@ def saveContrast(tableName,keyList,deleteList,insertList,sameList,updateList):
     return deleteList,insertList,sameList,updateList
 
 
-contrasrList = makeContrasr(5)
+# contrasrList = makeContrasr(5)
 
 
 
