@@ -128,9 +128,9 @@ def getCurContrasrInfo():
     for table in tableList:
         resultList = getDiffNumByTableName(table)
         resultDicts[table] = resultList
-    return [tableList, produceList, viewList, fieldDicts,resultDicts]
+    return [str(curBackupVersion),tableList, produceList, viewList, fieldDicts,resultDicts]
 
-print(getCurContrasr())
+print(getCurContrasrInfo())
 
 
 
