@@ -7,6 +7,7 @@ import calendar
 import datetime
 from backGround.backupSql import *
 from backGround.setupSql import *
+from backGround.contrast import *
 
 class BackupPage(modelPage.Ui_MainWindow):
     def __init__(self):
@@ -26,6 +27,8 @@ class BackupPage(modelPage.Ui_MainWindow):
         createBackupBtn.clicked.connect(self.createBackupBtn_clicked)
         # 新建一个对比按钮
         compareBtn = QPushButton("对比")
+        # 为对比按钮增加槽函数
+        compareBtn.clicked.connect(self.compareBtn_clicked)
         # 新建一个删除按钮
         deleteBtn = QPushButton("删除")
         # 为删除按钮添加槽函数
@@ -216,6 +219,12 @@ class BackupPage(modelPage.Ui_MainWindow):
         endTime = self.yearComboBox2.currentText() + self.monthComboBox2.currentText().rjust(2, '0') + self.dayComboBox2.currentText().rjust(2, '0')
         createNewBackup([startTime, endTime], tableList, processList, viewList)
 
+    def compareBtn_clicked(self):
+        # 使用QButtonGroup提供的函数更高效
+        if self.confirmBtnGroup.checkedId() == -1:
+            QMessageBox.question(self, 'Message', "请选择一个备份版本", QMessageBox.Yes, QMessageBox.Yes)
+            return
+        makeContrasr(self.backupTable.item(self.confirmBtnGroup.checkedId(), 1).text())
 
 
     def navigationWidget_currentItemChanged(self):
