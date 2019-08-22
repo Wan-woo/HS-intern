@@ -11,7 +11,7 @@
 '''
 from backGround.backupSql import getBackupTime,getObjectByVersion,listsToList
 from backGround.setupSql import changeCurContrast,getbackupFieldKey
-from backGround.testConnection import getSqliteConnection,getOrcaleConnection,sqliteExecute,oracleExcute,oracleNoFetch
+from backGround.testConnection import getSqliteConnection,getOrcaleConnection,sqliteExecute,oracleExcute,oracleNoFetch,tuplesToList
 import cx_Oracle
 
 
@@ -28,6 +28,16 @@ def fieldListToStr(fieldList):
         if len(fieldList)-1>index:
             fieldStr+=','
     return fieldStr
+
+"""
+    获取当前对比版本
+"""
+def getCurContrasrVersion():
+    getCurConSql = "select backupVersion from backupInformation where hasContrast = 1 "
+    curBackupVersion = sqliteExecute(getCurConSql)[0]
+    if len(curBackupVersion) == 0:
+        return []
+    return curBackupVersion
 
 """
         根据表名与类型查询主键，类型：1.删除 (del) 2.新增(insert) 3.相同(same) 4.更改(update) 5.不同（different）6.全部(all)
@@ -55,8 +65,36 @@ def getKeysByTableNameAndType(tableName,type,beginId,endId):
 
     return getList
 
+def getDataByKeys(tableName,keyList,fieldList,keyDataList):
+    keyNum = len(keyList)
+    recordNum = len(keyDataList)
+    fieldStr = fieldListToStr(fieldList)
+    oracleConn = getOrcaleConnection()
+    oracleCursor = oracleConn.cursor()
+    resultList = []
+    try:
 
+        for i in range(recordNum):
+            baseSql = "select %s from %s where " % (fieldStr, tableName)
+            for j in range(keyNum):
+                baseSql = baseSql + "%s = '%s' and "%(keyList[j],keyDataList[i][j])
+            baseSql = baseSql[:len(baseSql)-4]
+            oracleCursor.execute(baseSql)
+            subResult = oracleCursor.fetchall()
+            if len(subResult)==0:
+                resultList.append(subResult)
+            else:
+                subResult = tuplesToList(subResult)[0]
+                resultList.append(subResult)
+    except cx_Oracle.DatabaseError as err:
+        print(err)
+        print(baseSql)
+    oracleConn.close
+    return resultList
 
+"""
+    根据输入的表名和数据类型得到数据
+"""
 
 def getContrastData(tableName,type,pageNum):
     recordPerPage = 30
@@ -66,14 +104,31 @@ def getContrastData(tableName,type,pageNum):
     beginId = (pageNum-1)*recordPerPage*keyNum
     endId = pageNum*recordPerPage*keyNum
     resultList = getKeysByTableNameAndType(tableName,type,beginId,endId)
+    resultNum = len(resultList)
     keyDataList = []
-    for i in range(30):
+
+    for i in range(recordPerPage):
         subList = []
         for j in range(keyNum):
-            subList.append(resultList[i * keyNum + j][1])
+            if(resultNum>i * keyNum + j):
+                subList.append(resultList[i * keyNum + j][1])
+            else:
+                subList.append([])
         keyDataList.append(subList)
+    curBackupVersion = getCurContrasrVersion()
+    if len(curBackupVersion) == 0:
+        return []
+    curBackupVersion = curBackupVersion[0]
+    getBackupTableSql = 'select backupObjectName from backupObjectNameList where backupVersion = "%s" and objectName = "%s"'%(curBackupVersion,tableName)
+    backTableVersion = sqliteExecute(getBackupTableSql)[0]
+    if len(backTableVersion)==0:
+        return []
+    backupObjectName = "backup"+str(backTableVersion[0])
 
-print(getContrastData('S_FA_YSS_GZB',3,1))
+    CurData = getDataByKeys(tableName,keyList,fieldList,keyDataList)
+    backupData = getDataByKeys(backupObjectName,keyList,fieldList,keyDataList)
+    return [CurData,backupData]
+print(getContrastData('S_FA_YSS_GZB',1,1))
 
 
 """
@@ -97,16 +152,16 @@ def getDiffNumByTableName(tableName):
             returnNums.append(oracleExcute(searchSql)[0][0] // keyNum)
     return returnNums
 
-
 """
     获取当前对比内容信息
 """
 def getCurContrasrInfo():
-    getCurConSql = "select backupVersion from backupInformation where hasContrast = 1 "
-    curBackupVersion = sqliteExecute(getCurConSql)[0]
+
+    curBackupVersion = getCurContrasrVersion()
     if len(curBackupVersion)==0:
         return []
     curBackupVersion = curBackupVersion[0]
+
 
     tableSql = "Select objectName From backupObjectNameList Where objectType=1 and backupVersion = '%s' "%(curBackupVersion)
     tableList = sqliteExecute(tableSql)
