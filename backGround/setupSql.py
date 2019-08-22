@@ -63,7 +63,7 @@ def getModuleInfo():
     moduleInfo = listsToList(moduleInfo)
 
     return moduleInfo
-print(getModuleInfo())
+# print(getModuleInfo())
 
 """
       增加一个新模块
@@ -95,15 +95,25 @@ def getOracleInfo():
     viewList = listsToList(viewList)
 
     fieldDicts={}
-    for table in tableList:
-        fieldSql = "select COLUMN_NAME from USER_COL_COMMENTS where table_name = '%s'"%(table)
 
-        fieldList = oracleExcute(fieldSql)
-        fieldList = listsToList(fieldList)
-
-        fieldDicts[table]=fieldList
+    fieldSql = "select table_name,COLUMN_NAME from USER_COL_COMMENTS "
+    keyFieldLists = oracleExcute(fieldSql)
+    # fieldList = listsToList(fieldList)
+    for keyField in keyFieldLists:
+        fieldList = fieldDicts.get(keyField[0])
+        if(fieldList==None):
+            fieldDicts[keyField[0]] = [keyField[1]]
+        else:fieldDicts[keyField[0]].append(keyField[1])
+    print(fieldDicts)
+    # for table in tableList:
+    #     fieldSql = "select COLUMN_NAME from USER_COL_COMMENTS where table_name = '%s'"%(table)
+    #
+    #     fieldList = oracleExcute(fieldSql)
+    #     fieldList = listsToList(fieldList)
+    #
+    #     fieldDicts[table]=fieldList
     return [tableList,produceList,viewList,fieldDicts]
-print(getOracleInfo())
+# print(getOracleInfo())
 
 """
       获得所有配置信息
@@ -134,7 +144,7 @@ def getSetupList():
         elif(moduleObject[2]==3):
             moduleObject[2]="视图"
     return moduleObjects
-print(getSetupList())
+# print(getSetupList())
 
 """
       删除一个模块及关于此模块的配置的信息
@@ -199,7 +209,7 @@ def getbackupFieldKey(tableName):
     keyList = sqliteExecute(keySql)
     keyList = listsToList(keyList)
     return [fieldList,keyList]
-print(getbackupFieldKey("S_FA_YSS_GZB"))
+# print(getbackupFieldKey("S_FA_YSS_GZB"))
 
 
 # """
