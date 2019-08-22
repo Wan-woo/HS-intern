@@ -23,11 +23,12 @@ class DataPage(modelPage.Ui_MainWindow):
         self.inputLayout.addStretch(0.5)
         self.compareTable = QTableWidget()
         self.compareTable.setColumnCount(8)
-        self.compareTable.setHorizontalHeaderLabels(['选择', '备份表', '升级表', 'Insert', 'Update', 'Delete', 'Same', 'Message'])
+        self.compareTable.setHorizontalHeaderLabels(['选择', '备份表', '升级表', 'Delete', 'Insert', 'Same', 'Update', 'Message'])
         self.compareTable.setMaximumHeight(100)
 
         self.comboBox = QComboBox()
-        self.comboBox.addItems(['Difference', 'Insert', 'Delete', 'Update', 'Same', 'All'])
+        self.comboBox.addItems(['Delete', 'Insert', 'Same', 'Update', 'Difference', 'All'])
+        self.comboBox.setCurrentIndex(4)
         self.comboBox.setFixedWidth(120)
 
         # 选择表格总共有多少页，初始化为0
@@ -123,6 +124,26 @@ class DataPage(modelPage.Ui_MainWindow):
         self.oldTable.setHorizontalHeaderLabels(self.contrastInfo[4][tableName])
         self.newTable.setColumnCount(len(self.contrastInfo[4][tableName]))
         self.newTable.setHorizontalHeaderLabels(self.contrastInfo[4][tableName])
+        # 开始对数据进行展示,首先确定页面数量
+        if self.comboBox.currentIndex() < 4:
+            self.pageNum = self.contrastInfo[5][tableName][self.comboBox.currentIndex()] / 30
+        elif self.comboBox.currentIndex() == 4:
+            self.pageNum = (self.contrastInfo[5][tableName][0] + self.contrastInfo[5][tableName][1] + self.contrastInfo[5][tableName][3]) / 30
+        else:
+            self.pageNum = sum(self.contrastInfo[5][tableName]) / 30
+        self.pageNum = int(self.pageNum) + 1
+        self.pageTotal.setText('共' + str(self.pageNum) + '页')
+        self.pageTotal.setText(str(self.pageNum))
+        getContrastData(tableName, self.comboBox.currentIndex(), int(self.pageLable.text()))
+        oldTableList, newTableList = getContrastData(tableName, self.comboBox.currentIndex(), int(self.pageLable.text()))
+        self.oldTable.setRowCount(len(oldTableList))
+        self.newTable.setRowCount(len(newTableList))
+        for i in range(len(oldTableList)):
+            oldItem = oldTableList[i]
+            newItem = newTableList[i]
+            for j in range(len(oldItem)):
+                self.oldTable.setItem(i, j, QTableWidgetItem(oldItem[j]))
+                self.newTable.setItem(i, j, QTableWidgetItem(newItem[j]))
         pass
 
     def firstpageBtn_clicked(self):
@@ -138,7 +159,7 @@ class DataPage(modelPage.Ui_MainWindow):
         self.loadTableData(page)
 
     def nextpageBtn_clicked(self):
-        if int(self.pageLable.text()) == 10:
+        if int(self.pageLable.text()) == self.pageNum:
             QMessageBox.question(self, 'Message', "已经是最后一页", QMessageBox.Yes, QMessageBox.Yes)
             return
         page = int(self.pageLable.text()) + 1
@@ -146,8 +167,8 @@ class DataPage(modelPage.Ui_MainWindow):
         self.loadTableData(page)
 
     def finalpageBtn_clicked(self):
-        self.pageLable.setText('10')
-        self.loadTableData(10)
+        self.pageLable.setText(str(self.pageNum))
+        self.loadTableData(self.pageNum)
 
     def jumpBtn_clicked(self):
         if not self.pageLineEdit.text().isdecimal():
@@ -155,7 +176,7 @@ class DataPage(modelPage.Ui_MainWindow):
             self.pageLineEdit.clear()
             return
         page = int(self.pageLineEdit.text())
-        if page < 1 or page > 10:
+        if page < 1 or page > self.pageNum:
             QMessageBox.question(self, 'Message', "超出页面范围", QMessageBox.Yes, QMessageBox.Yes)
             self.pageLineEdit.clear()
             return
