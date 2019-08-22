@@ -223,8 +223,8 @@ def makeContrasr(backupVersion):
         # sameSql = 'select %s from (select %s from %s intersect select %s from %s where FDATE BETWEEN %s  AND %s)'%(keyStr,fieldStr,tableList[index],fieldStr,backupTableList[index],beginTime,endTime)
         # updateSql = '(select %s from %s intersect select %s from %s where FDATE BETWEEN %s  AND %s)minus ' \
         #             '(select %s from (%s))'%(keyStr,tableList[index],keyStr,backupTableList[index],beginTime,endTime,keyStr,sameSql)
-        deleteSql = 'select %s from %s MINUS select %s from %s '%(keyStr,tableList[index],keyStr,backupTableList[index])
-        insertSql = 'select %s from %s MINUS select %s from %s '%(keyStr,backupTableList[index],keyStr,tableList[index])
+        deleteSql = 'select %s from %s MINUS select %s from %s '%(keyStr,backupTableList[index],keyStr,tableList[index])
+        insertSql = 'select %s from %s MINUS select %s from %s '%(keyStr,tableList[index],keyStr,backupTableList[index])
         sameSql = 'select %s from (select %s from %s intersect select %s from %s )'%(keyStr,fieldStr,tableList[index],fieldStr,backupTableList[index])
         updateSql = '(select %s from %s intersect select %s from %s )minus ' \
                     '(select %s from (%s))'%(keyStr,tableList[index],keyStr,backupTableList[index],keyStr,sameSql)
