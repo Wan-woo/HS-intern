@@ -51,7 +51,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.functionList = getFunctionQuotaInfo()[0]
         self.quotaList = getFunctionQuotaInfo()[1]
         self.moduleList = getModuleInfo()
-        print(getOracleInfo())
+        # print(getOracleInfo())
         self.tableList = getOracleInfo()[0]
         self.processList = getOracleInfo()[1]
         self.viewList = getOracleInfo()[2]

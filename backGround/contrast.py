@@ -127,8 +127,8 @@ def getContrastData(tableName,type,pageNum):
 
     CurData = getDataByKeys(tableName,keyList,fieldList,keyDataList)
     backupData = getDataByKeys(backupObjectName,keyList,fieldList,keyDataList)
-    return [CurData,backupData]
-print(getContrastData('S_FA_YSS_GZB',1,1))
+    return CurData,backupData
+print(getContrastData('S_FA_YSS_GZB',3,1))
 
 
 """
@@ -185,7 +185,7 @@ def getCurContrasrInfo():
         resultDicts[table] = resultList
     return [str(curBackupVersion),tableList, produceList, viewList, fieldDicts,resultDicts]
 
-print(getCurContrasrInfo())
+# print(getCurContrasrInfo())
 
 
 
