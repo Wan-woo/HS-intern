@@ -134,8 +134,7 @@ class DataPage(modelPage.Ui_MainWindow):
         self.pageNum = int(self.pageNum) + 1
         self.pageTotal.setText('共' + str(self.pageNum) + '页')
         self.pageTotal.setText(str(self.pageNum))
-        getContrastData(tableName, self.comboBox.currentIndex(), int(self.pageLable.text()))
-        oldTableList, newTableList = getContrastData(tableName, self.comboBox.currentIndex(), int(self.pageLable.text()))
+        oldTableList, newTableList = getContrastData(tableName, self.comboBox.currentIndex() + 1, int(self.pageLable.text()))
         self.oldTable.setRowCount(len(oldTableList))
         self.newTable.setRowCount(len(newTableList))
         for i in range(len(oldTableList)):
