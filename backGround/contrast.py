@@ -13,7 +13,8 @@ from backGround.backupSql import getBackupTime,getObjectByVersion,listsToList
 from backGround.setupSql import changeCurContrast,getbackupFieldKey
 from backGround.testConnection import getSqliteConnection,getOrcaleConnection,sqliteExecute,oracleExcute,oracleNoFetch,tuplesToList
 import cx_Oracle
-
+import os
+os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
 
 
 """         
