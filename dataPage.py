@@ -1,7 +1,6 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from resource import NavigationWidget, NavigationWidgetUp
+from PyQt5.QtGui import *
 import modelPage
 from backGround.contrast import *
 
@@ -68,6 +67,17 @@ class DataPage(modelPage.Ui_MainWindow):
         self.newTableLayout = QVBoxLayout()
         self.oldTable = QTableWidget()
         self.newTable = QTableWidget()
+        self.verticalSliderBar1 = self.oldTable.verticalScrollBar()
+        self.verticalSliderBar2 = self.newTable.verticalScrollBar()
+        self.horizonSliderBar1 = self.oldTable.horizontalScrollBar()
+        self.horizonSliderBar2 = self.newTable.horizontalScrollBar()
+        self.verticalSliderBar1.actionTriggered.connect(lambda: self.syncScroll(self.verticalSliderBar1, self.verticalSliderBar2))
+        self.verticalSliderBar2.actionTriggered.connect(
+            lambda: self.syncScroll(self.verticalSliderBar2, self.verticalSliderBar1))
+        self.horizonSliderBar1.actionTriggered.connect(
+            lambda: self.syncScroll(self.horizonSliderBar1, self.horizonSliderBar2))
+        self.horizonSliderBar2.actionTriggered.connect(
+            lambda: self.syncScroll(self.horizonSliderBar2, self.horizonSliderBar1))
         self.oldTableLayout.addWidget(QLabel('备份表'), alignment=Qt.AlignCenter)
         self.oldTableLayout.addWidget(self.oldTable)
         self.newTableLayout.addWidget(QLabel('新表'), alignment=Qt.AlignCenter)
@@ -95,6 +105,10 @@ class DataPage(modelPage.Ui_MainWindow):
     def loadTableData(self, page):
         # 获取差异类型
         type = self.comboBox.currentText()
+
+    def syncScroll(self, sliderBar1, sliderBar2):
+        sliderValue = sliderBar1.value()
+        sliderBar2.setValue(sliderValue)
 
     def queryBtn_clicked(self):
         tableName = self.lineEdit.text()
@@ -147,6 +161,11 @@ class DataPage(modelPage.Ui_MainWindow):
             for j in range(len(oldItem)):
                 self.oldTable.setItem(i, j, QTableWidgetItem(oldItem[j]))
                 self.newTable.setItem(i, j, QTableWidgetItem(newItem[j]))
+                if oldItem[j] != newItem[j]:
+                    if oldItem[j] != '':
+                        self.oldTable.item(i, j).setForeground(QBrush(QColor(220, 20, 60)))
+                    if newItem[j] != '':
+                        self.newTable.item(i, j).setForeground(QBrush(QColor(220, 20, 60)))
         pass
 
     def firstpageBtn_clicked(self):
