@@ -129,7 +129,7 @@ def getContrastData(tableName,type,pageNum):
     CurData = getDataByKeys(tableName,keyList,fieldList,keyDataList)
     backupData = getDataByKeys(backupObjectName,keyList,fieldList,keyDataList)
     return CurData,backupData
-print(getContrastData('S_FA_YSS_GZB',3,1))
+
 
 
 """
