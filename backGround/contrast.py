@@ -48,17 +48,17 @@ def getKeysByTableNameAndType(tableName,type,beginId,endId):
 
 
     baseSqlPre  = "SELECT * FROM (SELECT ROWNUM AS rowno, t.PRIMARYKEYVALUE FROM CONTRASTRESULTS t WHERE BACKUPOBJECTNAME = '%s' "%(tableName)
-    baseSqlEnd  =  "AND ROWNUM <= %s) table_alias WHERE table_alias.rowno >= %s"%(endId,beginId)
+    baseSqlEnd  =  " AND ROWNUM <= %s) table_alias WHERE table_alias.rowno >= %s"%(endId,beginId)
     if str(type)=='1':
-        resultSql = baseSqlPre+"and DIFFERENCETYPE = 1 "+baseSqlEnd
+        resultSql = baseSqlPre+"and  DIFFERENCETYPE = 1 "+baseSqlEnd
     elif str(type)=='2':
-        resultSql = baseSqlPre+"and DIFFERENCETYPE = 2 "+baseSqlEnd
+        resultSql = baseSqlPre+"and  DIFFERENCETYPE = 2 "+baseSqlEnd
     elif str(type)=='3':
-        resultSql = baseSqlPre+"and DIFFERENCETYPE = 3 "+baseSqlEnd
+        resultSql = baseSqlPre+"and  DIFFERENCETYPE = 3 "+baseSqlEnd
     elif str(type)=='4':
-        resultSql = baseSqlPre+"and DIFFERENCETYPE = 4 "+baseSqlEnd
+        resultSql = baseSqlPre+"and  DIFFERENCETYPE = 4 "+baseSqlEnd
     elif str(type)=='5':
-        resultSql = baseSqlPre+"and DIFFERENCETYPE = 2 or DIFFERENCETYPE = 1 or DIFFERENCETYPE = 4 "+baseSqlEnd
+        resultSql = baseSqlPre+"and ( DIFFERENCETYPE = 2 or DIFFERENCETYPE = 1 or DIFFERENCETYPE = 4 ) "+baseSqlEnd
     else:
         resultSql = baseSqlPre+baseSqlEnd
 
