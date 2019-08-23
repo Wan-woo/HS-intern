@@ -10,6 +10,9 @@ class DataPage(modelPage.Ui_MainWindow):
         self.setupUi()
         self.tipsLabel.setText("这是数据页面")
 
+        # 设置的当前的tableName
+        self.tableName = None
+
         # 设置一个横向的Layout
         self.inputLayout = QHBoxLayout()
         self.lineEdit = QLineEdit()
@@ -27,6 +30,7 @@ class DataPage(modelPage.Ui_MainWindow):
 
         self.comboBox = QComboBox()
         self.comboBox.addItems(['Delete', 'Insert', 'Same', 'Update', 'Difference', 'All'])
+        self.comboBox.currentIndexChanged.connect(self.comboBox_currentIndexChanged)
         self.comboBox.setCurrentIndex(4)
         self.comboBox.setFixedWidth(120)
 
@@ -115,6 +119,7 @@ class DataPage(modelPage.Ui_MainWindow):
         if tableName not in self.matchString:
             QMessageBox.question(self, 'Message', "未查找到所需的表", QMessageBox.Yes, QMessageBox.Yes)
             return
+        self.tableName = tableName
         tableContrastResult = self.contrastInfo[5][tableName]
         self.compareTable.setRowCount(1)
         radioBtn = QRadioButton()
@@ -149,6 +154,9 @@ class DataPage(modelPage.Ui_MainWindow):
         self.pageTotal.setText('共' + str(self.pageNum) + '页')
         self.pageTotal.setText(str(self.pageNum))
         oldTableList, newTableList = getContrastData(tableName, self.comboBox.currentIndex() + 1, int(self.pageLable.text()))
+        # 首先清除旧数据
+        self.oldTable.clearContents()
+        self.newTable.clearContents()
         self.oldTable.setRowCount(len(oldTableList))
         self.newTable.setRowCount(len(newTableList))
         for i in range(len(oldTableList)):
@@ -166,7 +174,10 @@ class DataPage(modelPage.Ui_MainWindow):
                         self.oldTable.item(i, j).setForeground(QBrush(QColor(220, 20, 60)))
                     if newItem[j] != '':
                         self.newTable.item(i, j).setForeground(QBrush(QColor(220, 20, 60)))
-        pass
+
+    def comboBox_currentIndexChanged(self):
+        if self.tableName != None:
+            self.buttonGroup_clicked(self.tableName)
 
     def firstpageBtn_clicked(self):
         self.pageLable.setText('1')
