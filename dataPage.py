@@ -140,6 +140,10 @@ class DataPage(modelPage.Ui_MainWindow):
         for i in range(len(oldTableList)):
             oldItem = oldTableList[i]
             newItem = newTableList[i]
+            if len(oldItem) > len(newItem):
+                newItem += ['' for i in range(len(oldItem) - len(newItem))]
+            if len(newItem) > len(oldItem):
+                oldItem += ['' for i in range(len(newItem) - len(oldItem))]
             for j in range(len(oldItem)):
                 self.oldTable.setItem(i, j, QTableWidgetItem(oldItem[j]))
                 self.newTable.setItem(i, j, QTableWidgetItem(newItem[j]))
