@@ -20,6 +20,8 @@ def getModuleResult():
     contrasrTableResult = contrasrInfo[5]
     moduleList = getModuleInfo()
     changeModuleTableDict = {}
+    changeModuleProcedureDict = {}
+    changeModuleViewDict = {}
     for module in moduleList:
         tableList =  getObjectByModule(module)[0]
         changeTableList = []
@@ -30,5 +32,7 @@ def getModuleResult():
                     changeTableList.append(table)
         if len(changeTableList)!=0:
             changeModuleTableDict[module] = changeTableList
-    return [contrasrVersion,changeModuleTableDict]
+            changeModuleProcedureDict[module] = []
+            changeModuleViewDict[module] = []
+    return [contrasrVersion,changeModuleTableDict,changeModuleProcedureDict,changeModuleViewDict]
 print(getModuleResult())
