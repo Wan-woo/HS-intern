@@ -3,6 +3,13 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 import modelPage
 from backGround.contrast import *
+import logging
+
+LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"  # 日志格式化输出
+DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"  # 日期格式
+fp = logging.FileHandler('log.txt', encoding='utf-8')
+fs = logging.StreamHandler()
+logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT, handlers=[fp, fs])  # 调用
 
 class DataPage(modelPage.Ui_MainWindow):
     def __init__(self):
@@ -102,8 +109,33 @@ class DataPage(modelPage.Ui_MainWindow):
         self.lineEdit.setCompleter(QCompleter(self.matchString))
         pass
 
-    def loadTableInfo(self):
+    def loadTableInfo(self, tableList):
+        self.buttonGroup = QButtonGroup()
+        self.compareTable.setRowCount(len(tableList))
+        i = 0
+        for tableName in tableList:
+            tableContrastResult = self.contrastInfo[5][tableName]
+            radioBtn = QRadioButton()
+            self.buttonGroup.addButton(radioBtn)
+            self.compareTable.setCellWidget(i, 0, radioBtn)
+            self.compareTable.setItem(i, 1, QTableWidgetItem(tableName))
+            self.compareTable.setItem(i, 2, QTableWidgetItem(tableName))
+            self.compareTable.setItem(i, 3, QTableWidgetItem(str(tableContrastResult[0])))
+            self.compareTable.setItem(i, 4, QTableWidgetItem(str(tableContrastResult[1])))
+            self.compareTable.setItem(i, 5, QTableWidgetItem(str(tableContrastResult[2])))
+            self.compareTable.setItem(i, 6, QTableWidgetItem(str(tableContrastResult[3])))
+            self.buttonGroup.setId(radioBtn, i)
+            i += 1
+        self.buttonGroup.buttonClicked.connect(self.buttonGroup_checked)
         pass
+
+    def buttonGroup_checked(self):
+        if self.buttonGroup.checkedId() == -1:
+            return
+        logging.info(self.buttonGroup.checkedId())
+        tableName = self.compareTable.item(self.buttonGroup.checkedId(), 1).text()
+        logging.info(tableName)
+        self.buttonGroup_clicked(tableName)
 
     # 该函数用于刷新详细内容的表格
     def loadTableData(self, page):

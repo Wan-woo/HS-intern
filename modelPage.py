@@ -7,12 +7,20 @@
 # WARNING! All changes made in this file will be lost!
 
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from resource import NavigationWidget, NavigationWidgetUp
+from resource import NavigationWidgetUp
+from backGround.setupSql import *
+from backGround.backupSql import *
+from backGround.overViewSql import *
+from backGround.contrast import *
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
+    moduleInfo = []
+    backupInformation = []
+    moduleResult = []
+    count = 0
     # 继承初始化，需要将相关的变量在这里初始化
     def __init__(self):
         super(Ui_MainWindow, self).__init__()
@@ -63,3 +71,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def loadData(self):
         # 此函数一般用于加载首个页面的动态数据
         pass
+
+    def data_transform(self):
+        pass
+
+    @classmethod
+    def cls_loadData(cls):
+        Ui_MainWindow.moduleInfo = getModuleInfo()
+        Ui_MainWindow.backupInformation = getBackupInfomation()
+        Ui_MainWindow.moduleResult = getModuleResult()

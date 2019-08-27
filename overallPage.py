@@ -16,12 +16,18 @@ from backGround.setupSql import *
 from backGround.backupSql import *
 from backGround.overViewSql import *
 from backGround.contrast import *
+import logging
+
+LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"  # 日志格式化输出
+DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"  # 日期格式
+fp = logging.FileHandler('log.txt', encoding='utf-8')
+fs = logging.StreamHandler()
+logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT, handlers=[fp, fs])  # 调用
 
 class OverallPage(modelPage.Ui_MainWindow):
     def __init__(self):
         super(OverallPage, self).__init__()
         self.setupUi()
-
         # 在init方法中，预先生成要用到的组件
         self.reportFrame = QFrame()
 
@@ -53,12 +59,9 @@ class OverallPage(modelPage.Ui_MainWindow):
         self.backupVerBtn.clicked.connect(lambda: self.showTable(False))
 
     def loadData(self):
-        self.navigationWidget.setItems(getModuleInfo())
-        self.backupInfo = getBackupInfomation()
-        for item in self.backupInfo:
+        self.navigationWidget.setItems(self.moduleInfo)
+        for item in self.backupInformation:
             self.backupComboBox.addItem(str(item[0]))
-        # 获取之前对比的结果
-        self.moduleResult = getModuleResult()
         if len(self.moduleResult) == 0:
             self.backupVerLabel.setText('无备份版本')
         else:
@@ -74,14 +77,14 @@ class OverallPage(modelPage.Ui_MainWindow):
                 makeContrast(self.backupComboBox.currentText())
                 self.moduleResult = getModuleResult()
         # 设置表格控件
-        reportTable = QtWidgets.QTableWidget()
-        reportTable.setColumnCount(3)
-        reportTable.setHorizontalHeaderLabels(['模块名', '差异结果', '查看按钮'])
-        reportTable.setColumnWidth(0, 150)
-        reportTable.setColumnWidth(1, 150)
-        reportTable.setColumnWidth(2, 150)
+        self.reporTable = QtWidgets.QTableWidget()
+        self.reporTable.setColumnCount(3)
+        self.reporTable.setHorizontalHeaderLabels(['模块名', '差异结果', '查看按钮'])
+        self.reporTable.setColumnWidth(0, 150)
+        self.reporTable.setColumnWidth(1, 150)
+        self.reporTable.setColumnWidth(2, 150)
         # 设置表格的行数
-        reportTable.setRowCount(len(self.moduleResult[1]))
+        self.reporTable.setRowCount(len(self.moduleResult[1]))
         # 设置表格控件最后一列为按钮
         # 创建一个按钮组，将所有按钮加入进去
         self.confirmBtnGroup = QButtonGroup()
@@ -90,29 +93,29 @@ class OverallPage(modelPage.Ui_MainWindow):
             self.confirmBtn = QPushButton('查看')
             self.confirmBtn.setCheckable(True)
             self.confirmBtn.setStyleSheet("QPushButton{margin-left:20px;margin-right:20px;};")
-            reportTable.setCellWidget(i, 2, self.confirmBtn)
+            self.reporTable.setCellWidget(i, 2, self.confirmBtn)
             self.confirmBtnGroup.addButton(self.confirmBtn)
             self.confirmBtnGroup.setId(self.confirmBtn, i)
             # 设置第一列模块名
-            reportTable.setItem(i, 0, QTableWidgetItem(key))
+            self.reporTable.setItem(i, 0, QTableWidgetItem(key))
             output = '共有'+str(len(self.moduleResult[1][key]))+'张表存在不同,'
             output += '共有' + str(len(self.moduleResult[2][key])) + '个存储过程存在不同,'
             output += '共有' + str(len(self.moduleResult[3][key])) + '张视图存在不同.'
-            reportTable.setItem(i, 1, QTableWidgetItem(output))
+            self.reporTable.setItem(i, 1, QTableWidgetItem(output))
             i += 1
         # 为按钮组添加槽函数
         self.confirmBtnGroup.buttonClicked.connect(self.confirmBtnGroup_clicked)
         # 将上述组件添加进入frame中
-        self.normalFrameLayout.addWidget(reportTable, 1, 1, 3, 4)
+        self.normalFrameLayout.addWidget(self.reporTable, 1, 1, 3, 4)
 
 
     def confirmBtnGroup_clicked(self):
         if self.confirmBtnGroup.checkedId() != -1:
             self.normalFrame.setVisible(False)
-            self.setReportFrame(self.confirmBtnGroup.checkedId())
+            self.setReportFrame(self.reporTable.item(self.confirmBtnGroup.checkedId(), 0).text())
             self.reportFrame.setVisible(True)
 
-    def setReportFrame(self, checkedId):
+    def setReportFrame(self, moduleName):
         reportFrameLayout = QVBoxLayout(self.reportFrame)
         threeReportFrameLayout = QHBoxLayout()
         threeReportFrameLayout.setSpacing(30)
@@ -123,12 +126,13 @@ class OverallPage(modelPage.Ui_MainWindow):
         dataLabel = QLabel('数据对比')
         # 创建一个数据表格
         dataTable = QTableWidget()
-        dataTable.setColumnCount(3)
+        dataTable.setColumnCount(1)
         dataTable.setRowCount(10)
         # 创建一个查看按钮
         dataConfirmBtn = QPushButton('查看')
         dataConfirmBtn.setFixedHeight(15)
         dataConfirmBtn.setStyleSheet("QPushButton{margin-left:50px;margin-right:50px;};")
+        dataConfirmBtn.clicked.connect(lambda: self.dataConfirmBtn_clicked(self.moduleResult[1][moduleName]))
         # 将所有组件添加到其中
         dataLayout.addWidget(dataLabel, alignment=Qt.AlignCenter)
         dataLayout.addWidget(dataTable)
@@ -138,7 +142,7 @@ class OverallPage(modelPage.Ui_MainWindow):
         viewprocessLayout.setSpacing(10)
         viewprocessLabel = QLabel('视图/存储过程对比')
         viewprocessTable = QTableWidget()
-        viewprocessTable.setColumnCount(3)
+        viewprocessTable.setColumnCount(1)
         viewprocessBtn = QPushButton('查看')
         viewprocessBtn.setStyleSheet("QPushButton{margin-left:50px;margin-right:50px;};")
         viewprocessBtn.setFixedHeight(15)
@@ -150,7 +154,7 @@ class OverallPage(modelPage.Ui_MainWindow):
         funcreportLayout.setSpacing(10)
         funcreportLable = QLabel('功能/报表对比')
         funcreportTable = QTableWidget()
-        funcreportTable.setColumnCount(3)
+        funcreportTable.setColumnCount(1)
         funcreportBtn = QPushButton('查看')
         funcreportBtn.setFixedHeight(15)
         funcreportBtn.setStyleSheet("QPushButton{margin-left:50px;margin-right:50px;};")
@@ -158,6 +162,16 @@ class OverallPage(modelPage.Ui_MainWindow):
         funcreportLayout.addWidget(funcreportTable)
         funcreportLayout.addWidget(funcreportBtn)
 
+        # 向三张表格增加数据
+        dataTable.setRowCount(len(self.moduleResult[1][moduleName]))
+        viewprocessTable.setRowCount(len(self.moduleResult[2][moduleName]))
+        funcreportTable.setRowCount(len(self.moduleResult[3][moduleName]))
+        for item in [[dataTable, self.moduleResult[1][moduleName]], [viewprocessTable, self.moduleResult[2][moduleName]], [funcreportTable, self.moduleResult[3][moduleName]]]:
+            table = item[0]
+            i = 0
+            for name in item[1]:
+                table.setItem(i, 0, QTableWidgetItem(name))
+                i += 1
         # 设置一个返回按钮
         returnBtn = QPushButton('返回')
         returnBtn.setMinimumWidth(100)
@@ -175,46 +189,8 @@ class OverallPage(modelPage.Ui_MainWindow):
         self.reportFrame.setVisible(False)
         self.normalFrame.setVisible(True)
 
-
-
-
-
-'''
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        MainWindow.resize(600, 400)
-        MainWindow.setWindowTitle(u'导航条控件')
-        mainWidget = QWidget()
-        MainWindow.setCentralWidget(mainWidget)
-        # 设置左侧导航条
-        navigationWidget = NavigationWidget.NavigationWidget()
-        navigationWidget.setRowHeight(50)
-        navigationWidget.setItems([u'常规', u'高级', u'管理', u'其它', u'关于'])
-        # 设置上方导航条
-        navigationWidgetUp = NavigationWidgetUp.NavigationWidget()
-        navigationWidgetUp.setRowHeight(50)
-
-        self.tipsLabel = QLabel(u"请选择：")
-
-        mainLayout = QGridLayout(mainWidget)
-
-        mainLayout.setContentsMargins(0, 0, 0, 0)
-        mainLayout.setSpacing(10)
-        mainLayout.addWidget(navigationWidget, 2, 0, 4, 1)
-        mainLayout.addWidget(navigationWidgetUp, 0, 0, 1, 6)
-        mainLayout.addWidget(self.tipsLabel, 1, 1, 4, 5, Qt.AlignCenter)
-
-        navigationWidget.currentItemChanged[int, str].connect(self.slotCurrentItemChanged)
-        navigationWidget.setCurrentIndex(-1)
-
-        #self.gridLayout.addWidget(self, navigationWidget)
-        self.retranslateUi(MainWindow)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-    def slotCurrentItemChanged(self, index, content):
-        self.tipsLabel.setText(u"Current index and content：{} ---- {}".format(index, content))
-
-    def retranslateUi(self, MainWindow):
-        _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-'''
+    def dataConfirmBtn_clicked(self, tableList):
+        self.close()
+        self.pageList[1].show()
+        logging.info(tableList)
+        self.pageList[1].loadTableInfo(tableList)

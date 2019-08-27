@@ -50,7 +50,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         # 加载匹配项
         self.functionList = getFunctionQuotaInfo()[0]
         self.quotaList = getFunctionQuotaInfo()[1]
-        self.moduleList = getModuleInfo()
+        self.moduleList = self.moduleInfo
         # print(getOracleInfo())
         self.tableList = getOracleInfo()[0]
         self.processList = getOracleInfo()[1]
@@ -59,7 +59,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.setupList = getSetupList()
         # 加载
         self.chooseComboBox.clear()
-        self.chooseComboBox.addItems(getModuleInfo())
+        self.chooseComboBox.addItems(self.moduleInfo)
         # 加载被选择列表
         self.processChooseList = []
         self.viewChooseList = []
@@ -126,6 +126,7 @@ class SetupPage(modelPage.Ui_MainWindow):
             QMessageBox.question(self, 'Message', "输入模块名不能重复", QMessageBox.Yes, QMessageBox.Yes)
             return
         insertModule(moduleName)
+        modelPage.Ui_MainWindow.moduleInfo = getModuleInfo()
         # 先进行删除
         self.editModuleFrame.deleteLater()
         self.setEditModuleFrame()

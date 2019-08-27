@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QTableWidgetItem, QHeaderView
 from PyQt5.QtGui import QIcon
 from PyQt5 import QtCore
+from modelPage import *
 import loginPage, overallPage, setupPage, backupPage, reportFormPage, functionPage, codePage, dataPage
 import backGround.testConnection
 
@@ -34,6 +35,7 @@ class Login(QtWidgets.QMainWindow, loginPage.Ui_MainWindow):
     def confirmButton_click(self):
         # 测试时可以关闭
         if not self.isConnectionSuccess:
+            Ui_MainWindow.cls_loadData()
             # 设置pageList
             pageList = [overallPage, dataPage, codePage, functionPage, reportFormPage, backupPage, setupPage]
             for page in pageList:
@@ -64,6 +66,5 @@ if __name__ == '__main__':
     reportFormPage = reportFormPage.ReportFormPage()
     backupPage = backupPage.BackupPage()
     setupPage = setupPage.SetupPage()
-
     sys.exit(app.exec_())
 
