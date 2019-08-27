@@ -20,7 +20,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     moduleInfo = []
     backupInformation = []
     moduleResult = []
-    count = 0
+    contrastInfo = []
+    functionQuotaInfo = []
+    oracleInfo = []
+    setupList = []
+
     # 继承初始化，需要将相关的变量在这里初始化
     def __init__(self):
         super(Ui_MainWindow, self).__init__()
@@ -52,7 +56,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def slotCurrentItemChanged(self, index, content):
         self.close()
-        #self.pageList[index].loadData()
+        self.pageList[index].loadData()
         self.update()
         self.pageList[index].show()
 
@@ -80,3 +84,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         Ui_MainWindow.moduleInfo = getModuleInfo()
         Ui_MainWindow.backupInformation = getBackupInfomation()
         Ui_MainWindow.moduleResult = getModuleResult()
+        Ui_MainWindow.contrastInfo = getCurContrastInfo()
+        Ui_MainWindow.functionQuotaInfo = getFunctionQuotaInfo()
+        Ui_MainWindow.oracleInfo = getOracleInfo()
+        Ui_MainWindow.setupList = getSetupList()

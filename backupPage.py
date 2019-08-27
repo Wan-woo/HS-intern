@@ -53,7 +53,6 @@ class BackupPage(modelPage.Ui_MainWindow):
 
     def loadData(self):
         # 此函数用于在登陆成功之后加载数据
-        self.backupInformation = getBackupInfomation()
         self.backupTable.setRowCount(len(self.backupInformation))
         self.confirmBtnGroup = QButtonGroup()
         for i in range(self.backupTable.rowCount()):
@@ -83,7 +82,7 @@ class BackupPage(modelPage.Ui_MainWindow):
         # 设置左侧导航条
         self.navigationWidget = NavigationWidget.NavigationWidget()
         self.navigationWidget.setRowHeight(50)
-        self.navigationWidget.setItems(getModuleInfo())
+        self.navigationWidget.setItems(self.moduleInfo)
         # 导航条添加槽函数
         self.navigationWidget.currentItemChanged.connect(self.navigationWidget_currentItemChanged)
         # 新建一个Layout用于安放选择日期
@@ -132,9 +131,9 @@ class BackupPage(modelPage.Ui_MainWindow):
         self.calendarLayout.addWidget(self.dayComboBox2)
         # 读取数据、存储过程和视图的所有表格
         # 加载要选择备份的表
-        self.tableList = getOracleInfo()[0]
-        self.processList = getOracleInfo()[1]
-        self.viewList = getOracleInfo()[2]
+        self.tableList = self.oracleInfo[0]
+        self.processList = self.oracleInfo[1]
+        self.viewList = self.oracleInfo[2]
         # 创建一个Layout
         self.tableLayout = QHBoxLayout()
         self.tableVlayout = QVBoxLayout()
@@ -218,6 +217,7 @@ class BackupPage(modelPage.Ui_MainWindow):
         startTime = self.yearComboBox1.currentText() + self.monthComboBox1.currentText().rjust(2, '0') + self.dayComboBox1.currentText().rjust(2, '0')
         endTime = self.yearComboBox2.currentText() + self.monthComboBox2.currentText().rjust(2, '0') + self.dayComboBox2.currentText().rjust(2, '0')
         createNewBackup([startTime, endTime], tableList, processList, viewList)
+        modelPage.Ui_MainWindow.backupInformation = getBackupInfomation()
         # 显示备份成功的信息
         QMessageBox.question(self, 'Message', "备份成功", QMessageBox.Yes, QMessageBox.Yes)
         self.returnBtn_clicked()

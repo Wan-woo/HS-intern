@@ -48,15 +48,14 @@ class SetupPage(modelPage.Ui_MainWindow):
     def loadData(self):
         # 加载所有需要的数据项
         # 加载匹配项
-        self.functionList = getFunctionQuotaInfo()[0]
-        self.quotaList = getFunctionQuotaInfo()[1]
+        self.functionList = self.functionQuotaInfo[0]
+        self.quotaList = self.functionQuotaInfo[1]
         self.moduleList = self.moduleInfo
         # print(getOracleInfo())
-        self.tableList = getOracleInfo()[0]
-        self.processList = getOracleInfo()[1]
-        self.viewList = getOracleInfo()[2]
-        self.fieldTableDict = getOracleInfo()[3]
-        self.setupList = getSetupList()
+        self.tableList = self.oracleInfo[0]
+        self.processList = self.oracleInfo[1]
+        self.viewList = self.oracleInfo[2]
+        self.fieldTableDict = self.oracleInfo[3]
         # 加载
         self.chooseComboBox.clear()
         self.chooseComboBox.addItems(self.moduleInfo)
@@ -135,6 +134,7 @@ class SetupPage(modelPage.Ui_MainWindow):
     def delModuleBtn_clicked(self):
         moduleName = self.delModuleLineText.currentText()
         deleteModule(moduleName)
+        modelPage.Ui_MainWindow.moduleInfo = getModuleInfo()
         # 先进行删除
         self.editModuleFrame.deleteLater()
         self.setEditModuleFrame()
@@ -281,6 +281,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         for tableName in self.tableChooseList:
             self.returnTableDict[tableName] = self.tempReturnDict[tableName]
         insertModuleObjectsField(self.returnDict, self.returnTableDict)
+        modelPage.Ui_MainWindow.setupList = getSetupList()
         # 立刻返回
         self.addSetupFrame.deleteLater()
         self.setAddSetupFrame()
@@ -319,7 +320,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.delModuleLineLable = QLabel('请选择删除模块名')
         self.delModuleLineText = QComboBox()
         self.delModuleLineText.clear()
-        self.delModuleLineText.addItems(getModuleInfo())
+        self.delModuleLineText.addItems(self.moduleInfo)
         self.delModuleLineText.setFixedWidth(150)
         self.delModuleLineLayout.addWidget(self.delModuleLineLable)
         self.delModuleLineLayout.addWidget(self.delModuleLineText)

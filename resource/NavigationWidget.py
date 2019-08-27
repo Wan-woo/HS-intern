@@ -29,7 +29,7 @@ class NavigationWidget(QWidget):
         self.listItems = items
         for i in range(len(items)):
             self.checkBoxList.append(QCheckBox(self))
-            self.checkBoxList[i].move(40, self.rowHeight*i + 20)
+            self.checkBoxList[i].move(10, self.rowHeight*i + 10)
             #self.checkBoxList[i].toggle()
         self.update()
 
