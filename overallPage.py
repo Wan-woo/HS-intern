@@ -37,7 +37,6 @@ class OverallPage(modelPage.Ui_MainWindow):
         self.normalFrameLayout = QGridLayout(self.normalFrame)
         # 设置左侧导航条
         self.navigationWidget = NavigationWidget.NavigationWidget()
-        self.navigationWidget.setRowHeight(50)
         # 设置多选框
         self.backupComboBox = QtWidgets.QComboBox()
         self.backupComboBox.setFixedWidth(120)
@@ -60,6 +59,7 @@ class OverallPage(modelPage.Ui_MainWindow):
 
     def loadData(self):
         self.navigationWidget.setItems(self.moduleInfo)
+        self.backupComboBox.clear()
         for item in self.backupInformation:
             self.backupComboBox.addItem(str(item[0]))
         if len(self.moduleResult) == 0:
@@ -75,7 +75,8 @@ class OverallPage(modelPage.Ui_MainWindow):
         if newCompare:
             if alreadyComparedVersion != self.backupComboBox.currentText():
                 makeContrast(self.backupComboBox.currentText())
-                self.moduleResult = getModuleResult()
+                modelPage.Ui_MainWindow.moduleResult = getModuleResult()
+                modelPage.Ui_MainWindow.contrastInfo = getCurContrastInfo()
         # 设置表格控件
         self.reporTable = QtWidgets.QTableWidget()
         self.reporTable.setColumnCount(3)
