@@ -10,7 +10,7 @@
 @returnParam:
 '''
 import sqlite3
-from backGround.testConnection import getOrcaleConnection,connectOracle,sqliteExecute,oracleExcute,oracleNoFetch
+from backGround.testConnection import getOrcaleConnection,connectOracle,sqliteExecute,oracleExcute,oracleNoFetch,getSqliteConnection
 from backGround.setupSql import getbackupFieldKey,listsToList
 import logging
 
@@ -38,19 +38,25 @@ def checkSystemDb():
                 if not each_line or each_line == "\n":
                     continue
                 # 读取2000行数据，拼接成sql
-                elif count < 2000:
+                else:
                     sql += each_line
                     count += 1
                 # 读取达到2000行数据，进行提交，同时，初始化sql，count值
-                else:
-                    sqliteExecute(sql)
-                    sql = each_line
-                    count = 1
+
                 # 当读取完毕文件，不到2000行时，也需对拼接的sql 执行、提交
-            if sql:
-                sqliteExecute(sql)
+        sqlList = sql.split(";")
+        sqliteConn =  getSqliteConnection()
+        sqliteCusor = sqliteConn.cursor()
+        try:
+            for subSqlList in sqlList:
+                sqliteCusor.execute(subSqlList)
+        except sqlite3.Error as msg:
+            logging.debug(msg)
+            logging.debug(subSqlList)
+        sqliteConn.commit()
+        sqliteConn.close()
 
-
+# logging.info(checkSystemDb())
 
 def tuplesToList(fetchTuples):
     returnList = []

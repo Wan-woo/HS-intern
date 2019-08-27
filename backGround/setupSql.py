@@ -133,7 +133,7 @@ def getSetupList():
     moduleObjects =sqliteExecute(moduleObjectSql)
 
     if(len(moduleObjects)==0):
-        return
+        return []
     for moduleObject in moduleObjects:
         functionSql  = "select functionQuotaName from objectFunctionQuota where objectName = '%s' and objectType='%s' and functionQuotaType=1"%(moduleObject[1],moduleObject[2])
         functionResult=sqliteExecute(functionSql)

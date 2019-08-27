@@ -24,6 +24,8 @@ logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT,
 '''
 def getModuleResult():
     contrastInfo = getCurContrastInfo()
+    if len(contrastInfo)==0:
+        return []
     contrastVersion = contrastInfo[0]
     contrastTableResult = contrastInfo[5]
     moduleList = getModuleInfo()

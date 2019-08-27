@@ -43,7 +43,10 @@ def fieldListToStr(fieldList):
 """
 def getCurContrastVersion():
     getCurConSql = "select backupVersion from backupInformation where hasContrast = 1 "
-    curBackupVersion = sqliteExecute(getCurConSql)[0]
+    curBackupVersion = sqliteExecute(getCurConSql)
+    if len(curBackupVersion) == 0:
+        return []
+    curBackupVersion = curBackupVersion[0]
     if len(curBackupVersion) == 0:
         return []
     return curBackupVersion
@@ -168,7 +171,7 @@ def getCurContrastInfo():
 
     curBackupVersion = getCurContrastVersion()
     if len(curBackupVersion)==0:
-        return []
+        return [[],[],[],[],{},{}]
     curBackupVersion = curBackupVersion[0]
 
 
