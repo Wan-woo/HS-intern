@@ -62,6 +62,7 @@ def showTable(self):
 
 
 def confirmBtnGroup_clicked(self):
+    print(self.confirmBtnGroup.checkedId())
     if self.confirmBtnGroup.checkedId() != -1:
         self.normalFrame.setVisible(False)
         self.setReportFrame(self.confirmBtnGroup.checkedId())

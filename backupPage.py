@@ -54,6 +54,7 @@ class BackupPage(modelPage.Ui_MainWindow):
     def loadData(self):
         # 此函数用于在登陆成功之后加载数据
         self.backupInformation = getBackupInfomation()
+        print(self.backupInformation)
         self.backupTable.setRowCount(len(self.backupInformation))
         self.confirmBtnGroup = QButtonGroup()
         for i in range(self.backupTable.rowCount()):
@@ -67,8 +68,7 @@ class BackupPage(modelPage.Ui_MainWindow):
         self.confirmBtnGroup.buttonClicked.connect(self.confirmBtnGroup_clicked)
 
     def confirmBtnGroup_clicked(self):
-        # print(self.confirmBtnGroup.checkedId())
-        pass
+        print(self.confirmBtnGroup.checkedId())
 
     def dayComboBox_changed(self, comboBox):
         comboBox.clear()
@@ -227,7 +227,7 @@ class BackupPage(modelPage.Ui_MainWindow):
         if self.confirmBtnGroup.checkedId() == -1:
             QMessageBox.question(self, 'Message', "请选择一个备份版本", QMessageBox.Yes, QMessageBox.Yes)
             return
-        makeContrast(self.backupTable.item(self.confirmBtnGroup.checkedId(), 1).text())
+        makeContrasr(self.backupTable.item(self.confirmBtnGroup.checkedId(), 1).text())
 
 
     def navigationWidget_currentItemChanged(self):
@@ -239,9 +239,11 @@ class BackupPage(modelPage.Ui_MainWindow):
         self.chooseProcess = []
         self.chooseView = []
         for module in self.chooseModule:
+            print(getObjectByModule(module)[0])
             self.chooseTable.extend(getObjectByModule(module)[0])
             self.chooseProcess.extend(getObjectByModule(module)[1])
             self.chooseView.extend(getObjectByModule(module)[2])
+        print(self.chooseTable)
         for item in [[self.chooseTable, self.tableTable], [self.chooseProcess, self.processTable], [self.chooseView, self.viewTable]]:
             chooseList = item[0]
             table = item[1]

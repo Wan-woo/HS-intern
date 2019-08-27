@@ -43,6 +43,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(self)
 
     def slotCurrentItemChanged(self, index, content):
+        print(u"Current index and content：{} ---- {}".format(index, content))
         self.close()
         #self.pageList[index].loadData()
         self.update()

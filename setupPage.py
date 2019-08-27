@@ -87,8 +87,7 @@ class SetupPage(modelPage.Ui_MainWindow):
         pass
 
     def confirmBtnGroup_clicked(self):
-        #print(self.confirmBtnGroup.checkedId())
-        pass
+        print(self.confirmBtnGroup.checkedId())
 
     def editModuleBtn_clicked(self):
         self.setupFrame.setVisible(False)
@@ -113,6 +112,7 @@ class SetupPage(modelPage.Ui_MainWindow):
     def delBtn_clicked(self):
         for i in range(self.setupTable.rowCount()):
             if self.setupTable.cellWidget(i, 0).isChecked():
+                print(','.join([self.setupTable.item(i,1).text(), self.setupTable.item(i,2).text(), self.setupTable.item(i,3).text()]))
                 deleteModuleList([self.setupTable.item(i,1).text(), self.setupTable.item(i,2).text(), self.setupTable.item(i,3).text()])
         self.loadData()
         pass
@@ -125,7 +125,9 @@ class SetupPage(modelPage.Ui_MainWindow):
         elif moduleName in self.moduleList:
             QMessageBox.question(self, 'Message', "输入模块名不能重复", QMessageBox.Yes, QMessageBox.Yes)
             return
+        print(moduleName)
         insertModule(moduleName)
+        print('yes')
         # 先进行删除
         self.editModuleFrame.deleteLater()
         self.setEditModuleFrame()
@@ -133,7 +135,9 @@ class SetupPage(modelPage.Ui_MainWindow):
 
     def delModuleBtn_clicked(self):
         moduleName = self.delModuleLineText.currentText()
+        print(moduleName)
         deleteModule(moduleName)
+        print('yes')
         # 先进行删除
         self.editModuleFrame.deleteLater()
         self.setEditModuleFrame()
@@ -279,6 +283,8 @@ class SetupPage(modelPage.Ui_MainWindow):
         self.returnDict['table'] = self.tableChooseList
         for tableName in self.tableChooseList:
             self.returnTableDict[tableName] = self.tempReturnDict[tableName]
+        print(self.returnDict)
+        print(self.returnTableDict)
         insertModuleObjectsField(self.returnDict, self.returnTableDict)
         # 立刻返回
         self.addSetupFrame.deleteLater()
