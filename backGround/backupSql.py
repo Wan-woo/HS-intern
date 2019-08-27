@@ -12,6 +12,13 @@
 import sqlite3
 from backGround.testConnection import getOrcaleConnection,connectOracle,sqliteExecute,oracleExcute,oracleNoFetch
 from backGround.setupSql import getbackupFieldKey,listsToList
+import logging
+
+LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"    # 日志格式化输出
+DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"                        # 日期格式
+fp = logging.FileHandler('log.txt', encoding='utf-8')
+fs = logging.StreamHandler()
+logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT, handlers=[fp, fs])    # 调用
 
 """
         检查是否存在sqlite库，没有则创建库
@@ -22,7 +29,7 @@ def checkSystemDb():
 
     system_table_info = sqliteExecute(sql)
     if (len(system_table_info) == 0):
-        print("系统数据库信息不存在")
+        logging.info("系统数据库信息不存在")
         count = 0  # 读取行数
         sql = ""  # 拼接的sql语句
         with open('DBBuild.sql', "r", encoding="utf-8") as f:
@@ -115,7 +122,7 @@ def getObjectByVersion(backupVersion):
     viewList = sqliteExecute(viewSql)
 
     return tableList,processList,viewList
-print(getObjectByVersion("1"))
+
 
 """
        获得新的备份的备份表目标id起始范围
@@ -125,7 +132,7 @@ def getbackupObjectId():
     askSql = 'SELECT max(backupObjectName) from backupObjectNameList'
     version =  sqliteExecute(askSql)[0]
 
-    print(len(version))
+    logging.info(len(version))
     if ((len(version)==0)|(version[0]=='')):
         backupObjectName = 1
     else:
@@ -146,7 +153,7 @@ def getbackupVersionId():
         backupVersion = versionList[0] + 1
 
     return backupVersion
-print(getbackupObjectId())
+
 """
     在backupInformation中插入备份信息
 """
@@ -161,7 +168,7 @@ def insertBackupInformation(backupVersion,beginTime,endTime):
 """
 def getObjectByType(typeCode):
     if(typeCode!=1&typeCode!=2&typeCode!=3):
-        print("参数不合法")
+        logging.info("参数不合法")
 
     sql = "SELECT * FROM backupObjectNameList WHERE backupVersion ='' AND ObjectType = "+str(typeCode)+""
     objectList =  sqliteExecute(sql)
@@ -179,7 +186,7 @@ def createBackupTable(beginTime, endTime, tableList, backupVersionId):
     startId = getbackupObjectId()
 
     for list in tableList:
-        print(getbackupFieldKey(list))
+        logging.info(getbackupFieldKey(list))
         fieldList = getbackupFieldKey(list)
         fieldList = fieldList[0]
         fieldStr = ''
@@ -191,7 +198,7 @@ def createBackupTable(beginTime, endTime, tableList, backupVersionId):
         #             % ('backup' + str(startId), fieldStr, list, beginTime, endTime)
         createSql = 'create table  %s as select %s from %s ' \
                     % ('backup' + str(startId), fieldStr, list)
-        print(createSql)
+        logging.info(createSql)
         oracleNoFetch(createSql)
         insertNameListSql = 'insert into backupObjectNameList (backupVersion,objectName,backupObjectName,ObjectType) ' \
                             'values("%s","%s","%s",1)' % (backupVersionId, list, startId)
