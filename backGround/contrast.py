@@ -33,7 +33,7 @@ def fieldListToStr(fieldList):
 """
     获取当前对比版本
 """
-def getCurContrasrVersion():
+def getCurContrastVersion():
     getCurConSql = "select backupVersion from backupInformation where hasContrast = 1 "
     curBackupVersion = sqliteExecute(getCurConSql)[0]
     if len(curBackupVersion) == 0:
@@ -116,7 +116,7 @@ def getContrastData(tableName,type,pageNum):
             else:
                 subList.append([])
         keyDataList.append(subList)
-    curBackupVersion = getCurContrasrVersion()
+    curBackupVersion = getCurContrastVersion()
     if len(curBackupVersion) == 0:
         return []
     curBackupVersion = curBackupVersion[0]
@@ -156,9 +156,9 @@ def getDiffNumByTableName(tableName):
 """
     获取当前对比内容信息
 """
-def getCurContrasrInfo():
+def getCurContrastInfo():
 
-    curBackupVersion = getCurContrasrVersion()
+    curBackupVersion = getCurContrastVersion()
     if len(curBackupVersion)==0:
         return []
     curBackupVersion = curBackupVersion[0]
@@ -186,7 +186,7 @@ def getCurContrasrInfo():
         resultDicts[table] = resultList
     return [str(curBackupVersion),tableList, produceList, viewList, fieldDicts,resultDicts]
 
-# print(getCurContrasrInfo())
+# print(getCurcontrastInfo())
 
 
 
@@ -197,7 +197,7 @@ def getCurContrasrInfo():
         输入示例："3"
         输出：无
 """
-def makeContrasr(backupVersion):
+def makeContrast(backupVersion):
     truncateSql = "truncate table contrastResults"
     oracleNoFetch(truncateSql)
 
@@ -302,7 +302,7 @@ def saveContrast(tableName,keyList,deleteList,insertList,sameList,updateList):
     return deleteList,insertList,sameList,updateList
 
 
-# contrasrList = makeContrasr(5)
+# contrastList = makecontrast(5)
 
 
 

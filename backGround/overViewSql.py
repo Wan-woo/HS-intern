@@ -10,14 +10,14 @@
 @returnParam:
 '''
 from backGround.setupSql import getModuleInfo,getObjectByModule
-from backGround.contrast import getCurContrasrInfo
+from backGround.contrast import getCurContrastInfo
 '''
 返回分模块的对比结果差异
 '''
 def getModuleResult():
-    contrasrInfo = getCurContrasrInfo()
-    contrasrVersion = contrasrInfo[0]
-    contrasrTableResult = contrasrInfo[5]
+    contrastInfo = getCurContrastInfo()
+    contrastVersion = contrastInfo[0]
+    contrastTableResult = contrastInfo[5]
     moduleList = getModuleInfo()
     changeModuleTableDict = {}
     changeModuleProcedureDict = {}
@@ -27,12 +27,12 @@ def getModuleResult():
         changeTableList = []
         for table in tableList:
             table = table.upper()
-            if table in contrasrTableResult:
-                if contrasrTableResult[table][0]|contrasrTableResult[table][1]|contrasrTableResult[table][3]:
+            if table in contrastTableResult:
+                if contrastTableResult[table][0]|contrastTableResult[table][1]|contrastTableResult[table][3]:
                     changeTableList.append(table)
         if len(changeTableList)!=0:
             changeModuleTableDict[module] = changeTableList
             changeModuleProcedureDict[module] = []
             changeModuleViewDict[module] = []
-    return [contrasrVersion,changeModuleTableDict,changeModuleProcedureDict,changeModuleViewDict]
+    return [contrastVersion,changeModuleTableDict,changeModuleProcedureDict,changeModuleViewDict]
 print(getModuleResult())
