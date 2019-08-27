@@ -11,6 +11,14 @@
 '''
 from backGround.setupSql import getModuleInfo,getObjectByModule
 from backGround.contrast import getCurContrastInfo
+import logging
+
+LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"    # 日志格式化输出
+DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"                        # 日期格式
+fp = logging.FileHandler('log.txt', encoding='utf-8')
+fs = logging.StreamHandler()
+logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT, handlers=[fp, fs])    # 调用
+
 '''
 返回分模块的对比结果差异
 '''
@@ -35,4 +43,4 @@ def getModuleResult():
             changeModuleProcedureDict[module] = []
             changeModuleViewDict[module] = []
     return [contrastVersion,changeModuleTableDict,changeModuleProcedureDict,changeModuleViewDict]
-print(getModuleResult())
+logging.info(getModuleResult())

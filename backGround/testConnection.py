@@ -12,6 +12,13 @@
 import cx_Oracle
 import sqlite3
 import backGround.globalConn as gC
+import logging
+
+LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"    # 日志格式化输出
+DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"                        # 日期格式
+fp = logging.FileHandler('log.txt', encoding='utf-8')
+fs = logging.StreamHandler()
+logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT, handlers=[fp, fs])    # 调用
 
 
 """
@@ -50,7 +57,7 @@ def getOrcaleConnection():
         connection=cx_Oracle.connect(userName, passWord, host + "/" + serviceName)
         return connection
     except cx_Oracle.DatabaseError as msg:
-        print(msg)
+        logging.debug(msg)
         return connection
 def getSqliteConnection():
 
@@ -58,7 +65,7 @@ def getSqliteConnection():
         connection=sqlite3.connect("test.db")
         return connection
     except cx_Oracle.DatabaseError as msg:
-        print(msg)
+        logging.debug(msg)
         return connection
 def sqliteExecute(sql):
     sqlConn = getSqliteConnection()
@@ -70,34 +77,34 @@ def sqliteExecute(sql):
         returnList = tuplesToList(returnList)
         return returnList
     except sqlite3.Error as errmsg:
-        print(errmsg)
-        print(sql)
+        logging.debug(errmsg)
+        logging.debug(sql)
         return []
 # 测试语句 第一条正常 第二条报错
-# print(connectOracle('faisdb','faisdb','192.168.36.244','fais'))
-# print(connectOracle('faisdb','faisdb','192.168.36.244','fais1'))
+# logging.debug(connectOracle('faisdb','faisdb','192.168.36.244','fais'))
+# logging.debug(connectOracle('faisdb','faisdb','192.168.36.244','fais1'))
 def oracleExcute(sql):
     oracleConn = getOrcaleConnection()
     try:
         oracleCursor = oracleConn.cursor()
         oracleCursor.execute(sql)
-        print(sql)
+        logging.debug(sql)
         returnList = oracleCursor.fetchall()
         oracleConn.commit()
         returnList = tuplesToList(returnList)
         return returnList
     except cx_Oracle.DatabaseError as errmsg:
-        print(errmsg)
-        print(sql)
+        logging.debug(errmsg)
+        logging.debug(sql)
         return []
 def oracleNoFetch(sql):
     oracleConn = getOrcaleConnection()
     try:
         oracleCursor = oracleConn.cursor()
         oracleCursor.execute(sql)
-        print(sql)
+        logging.debug(sql)
         oracleConn.commit()
     except cx_Oracle.DatabaseError as errmsg:
-        print(errmsg)
-        print(sql)
+        logging.debug(errmsg)
+        logging.debug(sql)
         return []

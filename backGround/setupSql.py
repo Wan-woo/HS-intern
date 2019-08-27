@@ -11,6 +11,13 @@
 '''
 import sqlite3
 from backGround.testConnection import getOrcaleConnection,getSqliteConnection,oracleExcute,sqliteExecute,oracleNoFetch
+import logging
+
+LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"    # 日志格式化输出
+DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"                        # 日期格式
+fp = logging.FileHandler('log.txt', encoding='utf-8')
+fs = logging.StreamHandler()
+logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT, handlers=[fp, fs])    # 调用
 
 
 """
@@ -63,7 +70,7 @@ def getModuleInfo():
     moduleInfo = listsToList(moduleInfo)
 
     return moduleInfo
-# print(getModuleInfo())
+# logging.info(getModuleInfo())
 
 """
       增加一个新模块
@@ -104,7 +111,7 @@ def getOracleInfo():
         if(fieldList==None):
             fieldDicts[keyField[0]] = [keyField[1]]
         else:fieldDicts[keyField[0]].append(keyField[1])
-    print(fieldDicts)
+    logging.info(fieldDicts)
     # for table in tableList:
     #     fieldSql = "select COLUMN_NAME from USER_COL_COMMENTS where table_name = '%s'"%(table)
     #
@@ -113,7 +120,7 @@ def getOracleInfo():
     #
     #     fieldDicts[table]=fieldList
     return [tableList,produceList,viewList,fieldDicts]
-# print(getOracleInfo())
+# logging.info(getOracleInfo())
 
 """
       获得所有配置信息
@@ -121,7 +128,7 @@ def getOracleInfo():
 def getSetupList():
 
     moduleObjectSql = "select moduleName,objectName,objectType from moduleObject"
-    print(moduleObjectSql)
+    logging.info(moduleObjectSql)
 
     moduleObjects =sqliteExecute(moduleObjectSql)
 
@@ -144,7 +151,7 @@ def getSetupList():
         elif(moduleObject[2]==3):
             moduleObject[2]="视图"
     return moduleObjects
-# print(getSetupList())
+# logging.info(getSetupList())
 
 """
       删除一个模块及关于此模块的配置的信息
@@ -209,7 +216,7 @@ def getbackupFieldKey(tableName):
     keyList = sqliteExecute(keySql)
     keyList = listsToList(keyList)
     return [fieldList,keyList]
-# print(getbackupFieldKey("S_FA_YSS_GZB"))
+# logging.info(getbackupFieldKey("S_FA_YSS_GZB"))
 
 
 # """
@@ -278,6 +285,6 @@ def changeCurContrast(backupVersion):
     sqliteExecute(setSql)
 # returnDict = {'module': '模块1', 'function': [], 'quota': [], 'process': [], 'view': [], 'table': ['COURSE']}
 # returnTableDict = {'COURSE': {'key': ['CNAME'], 'field': ['CNO', 'TNO', 'CNAME']}}
-# print(insertModuleObjectsField(returnDict,returnTableDict))
+# logging.info(insertModuleObjectsField(returnDict,returnTableDict))
 
 

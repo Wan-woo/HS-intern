@@ -14,6 +14,14 @@ from backGround.setupSql import changeCurContrast,getbackupFieldKey
 from backGround.testConnection import getSqliteConnection,getOrcaleConnection,sqliteExecute,oracleExcute,oracleNoFetch,tuplesToList
 import cx_Oracle
 import os
+import logging
+
+LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"    # 日志格式化输出
+DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"                        # 日期格式
+fp = logging.FileHandler('log.txt', encoding='utf-8')
+fs = logging.StreamHandler()
+logging.basicConfig(level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT, handlers=[fp, fs])    # 调用
+
 os.environ['NLS_LANG'] = 'SIMPLIFIED CHINESE_CHINA.UTF8'
 
 
@@ -88,8 +96,8 @@ def getDataByKeys(tableName,keyList,fieldList,keyDataList):
                 subResult = tuplesToList(subResult)[0]
                 resultList.append(subResult)
     except cx_Oracle.DatabaseError as err:
-        print(err)
-        print(baseSql)
+        logging.debug(err)
+        logging.debug(baseSql)
     oracleConn.close
     return resultList
 
@@ -186,7 +194,7 @@ def getCurContrastInfo():
         resultDicts[table] = resultList
     return [str(curBackupVersion),tableList, produceList, viewList, fieldDicts,resultDicts]
 
-# print(getCurcontrastInfo())
+# logging.debug(getCurcontrastInfo())
 
 
 
@@ -294,9 +302,9 @@ def saveContrast(tableName,keyList,deleteList,insertList,sameList,updateList):
                     oracleCursor.execute(insertResultSql)
                     id+=1
                 recordId+=1
-        # print(updateSql)
+        # logging.debug(updateSql)
     except cx_Oracle.DatabaseError as Err:
-        print(Err)
+        logging.debug(Err)
     oracleConn.commit()
     oracleConn.close()
     return deleteList,insertList,sameList,updateList
