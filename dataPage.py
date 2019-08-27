@@ -96,7 +96,7 @@ class DataPage(modelPage.Ui_MainWindow):
         self.returnLayout().addLayout(self.newTableLayout, 2, 3, 3, 3)
 
     def loadData(self):
-        self.contrastInfo = getCurContrasrInfo()
+        self.contrastInfo = getCurContrastInfo()
         # 设置一个带匹配功能的输入框
         self.matchString = self.contrastInfo[1]
         self.lineEdit.setCompleter(QCompleter(self.matchString))
