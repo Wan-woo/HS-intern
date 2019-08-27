@@ -7,11 +7,15 @@
 # WARNING! All changes made in this file will be lost!
 
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from resource import NavigationWidget, NavigationWidgetUp
+from resource import NavigationWidget
 import modelPage
+from backGround.setupSql import *
+from backGround.backupSql import *
+from backGround.overViewSql import *
+from backGround.contrast import *
 
 class OverallPage(modelPage.Ui_MainWindow):
     def __init__(self):
@@ -28,14 +32,13 @@ class OverallPage(modelPage.Ui_MainWindow):
         # 设置左侧导航条
         self.navigationWidget = NavigationWidget.NavigationWidget()
         self.navigationWidget.setRowHeight(50)
-        self.navigationWidget.setItems([u'常规', u'高级', u'管理', u'其它', u'关于'])
         # 设置多选框
         self.backupComboBox = QtWidgets.QComboBox()
         self.backupComboBox.setFixedWidth(120)
         # 设置一键生成新对比按钮
         self.generateButton = QPushButton('一键生成新对比')
         # 设置查看已有对比的label
-        self.backupVerLabel = QtWidgets.QLabel('备份版本1.0')
+        self.backupVerLabel = QtWidgets.QLabel()
         # 设置查看之前对比的按钮
         self.backupVerBtn = QtWidgets.QPushButton('查看之前对比')
         # 将上述组件加入模板
@@ -46,27 +49,57 @@ class OverallPage(modelPage.Ui_MainWindow):
         self.normalFrameLayout.addWidget(self.backupVerBtn, 0, 4)
         self.returnLayout().addWidget(self.normalFrame, 1, 0, 4, 5)
         # 设置槽函数，显示表格
-        self.generateButton.clicked.connect(self.showTable)
+        self.generateButton.clicked.connect(lambda: self.showTable(True))
+        self.backupVerBtn.clicked.connect(lambda: self.showTable(False))
+
+    def loadData(self):
+        self.navigationWidget.setItems(getModuleInfo())
+        self.backupInfo = getBackupInfomation()
+        for item in self.backupInfo:
+            self.backupComboBox.addItem(str(item[0]))
+        # 获取之前对比的结果
+        self.moduleResult = getModuleResult()
+        if len(self.moduleResult) == 0:
+            self.backupVerLabel.setText('无备份版本')
+        else:
+            self.backupVerLabel.setText('备份版本'+str(self.moduleResult[0]))
+        pass
 
     # 设置函数，按下一键对比按钮，显示表格内容
-    def showTable(self):
+    def showTable(self, newCompare):
+        # 首先判断展示是使用已有的对比还是重新对比
+        alreadyComparedVersion = self.moduleResult[0]
+        if newCompare:
+            if alreadyComparedVersion != self.backupComboBox.currentText():
+                makeContrast(self.backupComboBox.currentText())
+                self.moduleResult = getModuleResult()
         # 设置表格控件
         reportTable = QtWidgets.QTableWidget()
         reportTable.setColumnCount(3)
-        reportTable.setRowCount(12)
+        reportTable.setHorizontalHeaderLabels(['模块名', '差异结果', '查看按钮'])
         reportTable.setColumnWidth(0, 150)
         reportTable.setColumnWidth(1, 150)
         reportTable.setColumnWidth(2, 150)
+        # 设置表格的行数
+        reportTable.setRowCount(len(self.moduleResult[1]))
         # 设置表格控件最后一列为按钮
         # 创建一个按钮组，将所有按钮加入进去
         self.confirmBtnGroup = QButtonGroup()
-        for i in range(reportTable.rowCount()):
+        i = 0
+        for key in self.moduleResult[1].keys():
             self.confirmBtn = QPushButton('查看')
             self.confirmBtn.setCheckable(True)
             self.confirmBtn.setStyleSheet("QPushButton{margin-left:20px;margin-right:20px;};")
             reportTable.setCellWidget(i, 2, self.confirmBtn)
             self.confirmBtnGroup.addButton(self.confirmBtn)
             self.confirmBtnGroup.setId(self.confirmBtn, i)
+            # 设置第一列模块名
+            reportTable.setItem(i, 0, QTableWidgetItem(key))
+            output = '共有'+str(len(self.moduleResult[1][key]))+'张表存在不同,'
+            output += '共有' + str(len(self.moduleResult[2][key])) + '个存储过程存在不同,'
+            output += '共有' + str(len(self.moduleResult[3][key])) + '张视图存在不同.'
+            reportTable.setItem(i, 1, QTableWidgetItem(output))
+            i += 1
         # 为按钮组添加槽函数
         self.confirmBtnGroup.buttonClicked.connect(self.confirmBtnGroup_clicked)
         # 将上述组件添加进入frame中
@@ -74,7 +107,6 @@ class OverallPage(modelPage.Ui_MainWindow):
 
 
     def confirmBtnGroup_clicked(self):
-        print(self.confirmBtnGroup.checkedId())
         if self.confirmBtnGroup.checkedId() != -1:
             self.normalFrame.setVisible(False)
             self.setReportFrame(self.confirmBtnGroup.checkedId())
