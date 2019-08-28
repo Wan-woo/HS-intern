@@ -64,6 +64,12 @@ class OverallPage(modelPage.Ui_MainWindow):
             self.backupComboBox.addItem(str(item[0]))
         if len(self.moduleResult) == 0:
             self.backupVerLabel.setText('无备份版本')
+            QMessageBox.question(self, 'Message',
+                                 '请先前往备份页面进行备份', QMessageBox.Yes, QMessageBox.Yes)
+            self.close()
+            self.pageList[5].loadData()
+            self.update()
+            self.pageList[5].show()
         else:
             self.backupVerLabel.setText('备份版本'+str(self.moduleResult[0]))
         pass
