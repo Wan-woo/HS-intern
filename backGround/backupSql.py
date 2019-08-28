@@ -139,7 +139,7 @@ def getbackupObjectId():
     version =  sqliteExecute(askSql)[0]
 
     logging.info(len(version))
-    if ((len(version)==0)|(version[0]=='')):
+    if ((len(version)==0)|(version[0]=='')|(version[0]==None)):
         backupObjectName = 1
     else:
         backupObjectName = int(version[0]) + 1
