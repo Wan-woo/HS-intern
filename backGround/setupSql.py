@@ -199,11 +199,17 @@ def getObjectByModule(moduleName):
 
     processName = sqliteExecute(processSql)
     processName = listsToList(processName)
+    processList = []
+    for process in processName:
+        processList.append(process.upper())
 
     viewName = sqliteExecute(viewSql)
     viewName = listsToList(viewName)
+    viewList = []
+    for view in viewName:
+        viewList.append(view.upper())
 
-    return tableName,processName,viewName
+    return tableList,processList,viewList
 
 
 
