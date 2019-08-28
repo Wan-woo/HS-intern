@@ -83,6 +83,7 @@ class OverallPage(modelPage.Ui_MainWindow):
                 makeContrast(self.backupComboBox.currentText())
                 modelPage.Ui_MainWindow.moduleResult = getModuleResult()
                 modelPage.Ui_MainWindow.contrastInfo = getCurContrastInfo()
+                self.loadData()
         # 设置表格控件
         self.reporTable = QtWidgets.QTableWidget()
         self.reporTable.setColumnCount(3)
