@@ -517,12 +517,3 @@ INSERT INTO "objectFunctionQuota" VALUES (1, '表1', 1, '功能1', 1, 1);
 INSERT INTO "objectFunctionQuota" VALUES (2, '表2', 1, '功能1', 1, 1);
 INSERT INTO "objectFunctionQuota" VALUES (3, '表2', 1, '功能2', 1, 0);
 
--- ----------------------------
--- Table structure for sqlite_sequence
--- ----------------------------
-DROP TABLE IF EXISTS "sqlite_sequence";
-CREATE TABLE "sqlite_sequence" (
-  "name",
-  "seq"
-);
-

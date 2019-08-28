@@ -229,17 +229,31 @@ def makeContrast(backupVersion):
 
         fieldStr = fieldListToStr(fieldList)
         keyStr = fieldListToStr(keyList)
+        if 'CREATE_DATE' in fieldList:
+            deleteSql = 'select %s from %s MINUS select %s from %s where CREATE_DATE BETWEEN %s  AND %s'%(keyStr,tableList[index],keyStr,backupTableList[index],beginTime,endTime)
+            insertSql = 'select %s from %s MINUS select %s from %s where CREATE_DATE BETWEEN %s  AND %s'%(keyStr,backupTableList[index],keyStr,tableList[index],beginTime,endTime)
+            sameSql = 'select %s from (select %s from %s intersect select %s from %s where CREATE_DATE BETWEEN %s  AND %s)'%(keyStr,fieldStr,tableList[index],fieldStr,backupTableList[index],beginTime,endTime)
+            updateSql = '(select %s from %s intersect select %s from %s where CREATE_DATE BETWEEN %s  AND %s)minus ' \
+                        '(select %s from (%s))'%(keyStr,tableList[index],keyStr,backupTableList[index],beginTime,endTime,keyStr,sameSql)
+        elif 'VC_UPDATETIME' in fieldList:
+            deleteSql = 'select %s from %s MINUS select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s' % (keyStr, tableList[index], keyStr, backupTableList[index],  str(beginTime)+'000000',str(endTime)+'000000')
+            insertSql = 'select %s from %s MINUS select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s' % (keyStr, backupTableList[index], keyStr, tableList[index],  str(beginTime)+'000000',str(endTime)+'000000')
+            sameSql = 'select %s from (select %s from %s intersect select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s)' % (keyStr, fieldStr, tableList[index], fieldStr, backupTableList[index], str(beginTime)+'000000',str(endTime)+'000000')
+            updateSql = '(select %s from %s intersect select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s)minus ' \
+                        '(select %s from (%s))' % (keyStr, tableList[index], keyStr, backupTableList[index], str(beginTime)+'000000',str(endTime)+'000000', keyStr, sameSql)
 
-        # deleteSql = 'select %s from %s MINUS select %s from %s where FDATE BETWEEN %s  AND %s'%(keyStr,tableList[index],keyStr,backupTableList[index],beginTime,endTime)
-        # insertSql = 'select %s from %s MINUS select %s from %s where FDATE BETWEEN %s  AND %s'%(keyStr,backupTableList[index],keyStr,tableList[index],beginTime,endTime)
-        # sameSql = 'select %s from (select %s from %s intersect select %s from %s where FDATE BETWEEN %s  AND %s)'%(keyStr,fieldStr,tableList[index],fieldStr,backupTableList[index],beginTime,endTime)
-        # updateSql = '(select %s from %s intersect select %s from %s where FDATE BETWEEN %s  AND %s)minus ' \
-        #             '(select %s from (%s))'%(keyStr,tableList[index],keyStr,backupTableList[index],beginTime,endTime,keyStr,sameSql)
-        deleteSql = 'select %s from %s MINUS select %s from %s '%(keyStr,backupTableList[index],keyStr,tableList[index])
-        insertSql = 'select %s from %s MINUS select %s from %s '%(keyStr,tableList[index],keyStr,backupTableList[index])
-        sameSql = 'select %s from (select %s from %s intersect select %s from %s )'%(keyStr,fieldStr,tableList[index],fieldStr,backupTableList[index])
-        updateSql = '(select %s from %s intersect select %s from %s )minus ' \
-                    '(select %s from (%s))'%(keyStr,tableList[index],keyStr,backupTableList[index],keyStr,sameSql)
+        else:
+
+            deleteSql = 'select %s from %s MINUS select %s from %s '%(keyStr,backupTableList[index],keyStr,tableList[index])
+            insertSql = 'select %s from %s MINUS select %s from %s '%(keyStr,tableList[index],keyStr,backupTableList[index])
+            sameSql = 'select %s from (select %s from %s intersect select %s from %s )'%(keyStr,fieldStr,tableList[index],fieldStr,backupTableList[index])
+            updateSql = '(select %s from %s intersect select %s from %s )minus ' \
+                        '(select %s from (%s))'%(keyStr,tableList[index],keyStr,backupTableList[index],keyStr,sameSql)
+        # deleteSql = 'select %s from %s MINUS select %s from %s '%(keyStr,backupTableList[index],keyStr,tableList[index])
+        # insertSql = 'select %s from %s MINUS select %s from %s '%(keyStr,tableList[index],keyStr,backupTableList[index])
+        # sameSql = 'select %s from (select %s from %s intersect select %s from %s )'%(keyStr,fieldStr,tableList[index],fieldStr,backupTableList[index])
+        # updateSql = '(select %s from %s intersect select %s from %s )minus ' \
+        #                     '(select %s from (%s))'%(keyStr,tableList[index],keyStr,backupTableList[index],keyStr,sameSql)
 
         deleteList = oracleExcute(deleteSql)
         insertList = oracleExcute(insertSql)

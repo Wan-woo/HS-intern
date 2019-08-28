@@ -200,10 +200,18 @@ def createBackupTable(beginTime, endTime, tableList, backupVersionId):
             fieldStr += field + ','
         lenthField = len(fieldStr)
         fieldStr = fieldStr[0:lenthField - 1]
-        # createSql = 'create table  %s as select %s from %s WHERE FDATE between %s and %s' \
-        #             % ('backup' + str(startId), fieldStr, list, beginTime, endTime)
-        createSql = 'create table  %s as select %s from %s ' \
-                    % ('backup' + str(startId), fieldStr, list)
+        if 'CREATE_DATE' in fieldList:
+            createSql = 'create table  %s as select %s from %s WHERE CREATE_DATE between %s and %s' \
+                        % ('backup' + str(startId), fieldStr, list, beginTime, endTime)
+        elif 'VC_UPDATETIME' in fieldList:
+            createSql = 'create table  %s as select %s from %s WHERE VC_UPDATETIME between %s and %s' \
+                        % ('backup' + str(startId), fieldStr, list, str(beginTime)+'000000',str(endTime)+'000000')
+        else:
+            createSql = 'create table  %s as select %s from %s ' \
+                        % ('backup' + str(startId), fieldStr, list)
+        #无时间
+        #createSql = 'create table  %s as select %s from %s ' \
+        #             % ('backup' + str(startId), fieldStr, list)
         logging.info(createSql)
         oracleNoFetch(createSql)
         insertNameListSql = 'insert into backupObjectNameList (backupVersion,objectName,backupObjectName,ObjectType) ' \

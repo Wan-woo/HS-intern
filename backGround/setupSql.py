@@ -193,6 +193,9 @@ def getObjectByModule(moduleName):
 
     tableName = sqliteExecute(tableSql)
     tableName = listsToList(tableName)
+    tableList = []
+    for table in tableName:
+        tableList.append(table.upper())
 
     processName = sqliteExecute(processSql)
     processName = listsToList(processName)
