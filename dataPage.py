@@ -138,8 +138,7 @@ class DataPage(modelPage.Ui_MainWindow):
 
     # 该函数用于刷新详细内容的表格
     def loadTableData(self, page):
-        # 获取差异类型
-        type = self.comboBox.currentText()
+        pass
 
     def syncScroll(self, sliderBar1, sliderBar2):
         sliderValue = sliderBar1.value()
@@ -214,7 +213,7 @@ class DataPage(modelPage.Ui_MainWindow):
 
     def firstpageBtn_clicked(self):
         self.pageLable.setText('1')
-        self.loadTableData(1)
+        self.buttonGroup_checked()
 
     def lastpageBtn_clicked(self):
         if int(self.pageLable.text()) == 1:
@@ -222,7 +221,7 @@ class DataPage(modelPage.Ui_MainWindow):
             return
         page = int(self.pageLable.text()) - 1
         self.pageLable.setText(str(page))
-        self.loadTableData(page)
+        self.buttonGroup_checked()
 
     def nextpageBtn_clicked(self):
         if int(self.pageLable.text()) == self.pageNum:
@@ -230,11 +229,11 @@ class DataPage(modelPage.Ui_MainWindow):
             return
         page = int(self.pageLable.text()) + 1
         self.pageLable.setText(str(page))
-        self.loadTableData(page)
+        self.buttonGroup_checked()
 
     def finalpageBtn_clicked(self):
         self.pageLable.setText(str(self.pageNum))
-        self.loadTableData(self.pageNum)
+        self.buttonGroup_checked()
 
     def jumpBtn_clicked(self):
         if not self.pageLineEdit.text().isdecimal():
@@ -247,4 +246,4 @@ class DataPage(modelPage.Ui_MainWindow):
             self.pageLineEdit.clear()
             return
         self.pageLable.setText(str(page))
-        self.loadTableData(page)
+        self.buttonGroup_checked()
