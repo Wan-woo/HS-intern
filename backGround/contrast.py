@@ -234,30 +234,30 @@ class Worker(QThread):
             fieldStr = fieldListToStr(fieldList)
             keyStr = fieldListToStr(keyList)
             if 'CREATE_DATE' in fieldList:
-                deleteSql = 'select %s from %s MINUS select %s from %s where CREATE_DATE BETWEEN %s  AND %s' % (
-                keyStr, tableList[index], keyStr, backupTableList[index], beginTime, endTime)
-                insertSql = 'select %s from %s MINUS select %s from %s where CREATE_DATE BETWEEN %s  AND %s' % (
-                keyStr, backupTableList[index], keyStr, tableList[index], beginTime, endTime)
-                sameSql = 'select %s from (select %s from %s intersect select %s from %s where CREATE_DATE BETWEEN %s  AND %s)' % (
-                keyStr, fieldStr, tableList[index], fieldStr, backupTableList[index], beginTime, endTime)
-                updateSql = '(select %s from %s intersect select %s from %s where CREATE_DATE BETWEEN %s  AND %s)minus ' \
+                deleteSql = 'select %s from %s where CREATE_DATE BETWEEN %s  AND %s  MINUS select %s from %s where CREATE_DATE BETWEEN %s  AND %s' % (
+                keyStr, tableList[index], beginTime, endTime, keyStr, backupTableList[index], beginTime, endTime)
+                insertSql = 'select %s from %s where CREATE_DATE BETWEEN %s  AND %s MINUS select %s from %s where CREATE_DATE BETWEEN %s  AND %s' % (
+                keyStr, backupTableList[index], beginTime, endTime, keyStr, tableList[index], beginTime, endTime)
+                sameSql = 'select %s from (select %s from %s where CREATE_DATE BETWEEN %s  AND %s intersect select %s from %s where CREATE_DATE BETWEEN %s  AND %s)' % (
+                keyStr, fieldStr, tableList[index], beginTime, endTime, fieldStr, backupTableList[index], beginTime, endTime)
+                updateSql = '(select %s from %s where CREATE_DATE  BETWEEN %s  AND %s intersect select %s from %s where CREATE_DATE BETWEEN %s  AND %s)minus ' \
                             '(select %s from (%s))' % (
-                            keyStr, tableList[index], keyStr, backupTableList[index], beginTime, endTime, keyStr,
+                            keyStr, tableList[index], beginTime, endTime, keyStr, backupTableList[index], beginTime, endTime, keyStr,
                             sameSql)
             elif 'VC_UPDATETIME' in fieldList:
-                deleteSql = 'select %s from %s MINUS select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s' % (
-                keyStr, tableList[index], keyStr, backupTableList[index], str(beginTime) + '000000',
+                deleteSql = 'select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s MINUS select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s' % (
+                keyStr, tableList[index], str(beginTime) + '000000',str(endTime) + '000000', keyStr, backupTableList[index], str(beginTime) + '000000',
                 str(endTime) + '000000')
-                insertSql = 'select %s from %s MINUS select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s' % (
-                keyStr, backupTableList[index], keyStr, tableList[index], str(beginTime) + '000000',
+                insertSql = 'select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s MINUS select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s' % (
+                keyStr, backupTableList[index], str(beginTime) + '000000',     str(endTime) + '000000', keyStr, tableList[index], str(beginTime) + '000000',
                 str(endTime) + '000000')
-                sameSql = 'select %s from (select %s from %s intersect select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s)' % (
-                keyStr, fieldStr, tableList[index], fieldStr, backupTableList[index], str(beginTime) + '000000',
+                sameSql = 'select %s from (select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s intersect select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s)' % (
+                keyStr, fieldStr, tableList[index], str(beginTime) + '000000',
+                str(endTime) + '000000', fieldStr, backupTableList[index], str(beginTime) + '000000',
                 str(endTime) + '000000')
-                updateSql = '(select %s from %s intersect select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s)minus ' \
-                            '(select %s from (%s))' % (
-                            keyStr, tableList[index], keyStr, backupTableList[index], str(beginTime) + '000000',
-                            str(endTime) + '000000', keyStr, sameSql)
+                updateSql = '(select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s intersect select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s)minus ' \
+                            '(select %s from (%s))' % (keyStr, tableList[index], str(beginTime) + '000000',str(endTime) + '000000',
+                                                       keyStr, backupTableList[index], str(beginTime) + '000000',str(endTime) + '000000', keyStr, sameSql)
 
             else:
 
