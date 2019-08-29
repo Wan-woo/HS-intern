@@ -27,9 +27,12 @@ class DataPage(modelPage.Ui_MainWindow):
         self.lineEdit.isClearButtonEnabled()
         self.queryBtn = QPushButton('确认查找')
         self.queryBtn.clicked.connect(self.queryBtn_clicked)
+        self.queryAllBtn = QPushButton('查找所有')
+        self.queryAllBtn.clicked.connect(self.queryAllBtn_clicked)
         self.inputLayout.addWidget(QLabel('请输入表名'))
         self.inputLayout.addWidget(self.lineEdit)
         self.inputLayout.addWidget(self.queryBtn)
+        self.inputLayout.addWidget(self.queryAllBtn)
         self.inputLayout.addStretch(0.5)
         self.compareTable = QTableWidget()
         self.compareTable.setColumnCount(8)
@@ -161,6 +164,9 @@ class DataPage(modelPage.Ui_MainWindow):
         self.compareTable.setItem(0, 4, QTableWidgetItem(str(tableContrastResult[1])))
         self.compareTable.setItem(0, 5, QTableWidgetItem(str(tableContrastResult[2])))
         self.compareTable.setItem(0, 6, QTableWidgetItem(str(tableContrastResult[3])))
+
+    def queryAllBtn_clicked(self):
+        self.loadTableInfo(self.contrastInfo[1])
 
     def buttonGroup_clicked(self, tableName):
         self.firstpageBtn.setEnabled(True)
