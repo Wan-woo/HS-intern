@@ -196,6 +196,7 @@ class BackupPage(modelPage.Ui_MainWindow):
         for i in range(self.backupTable.rowCount()):
             if self.backupTable.cellWidget(i, 0).isChecked():
                 deleteBackup(self.backupTable.item(i, 1).text())
+        modelPage.Ui_MainWindow.backupInformation = getBackupInfomation()
         self.loadData()
         pass
 
