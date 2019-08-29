@@ -77,16 +77,16 @@ class OverallPage(modelPage.Ui_MainWindow):
 
     # 设置函数，按下一键对比按钮，显示表格内容
     def showTable(self, newCompare):
-        # 在此处进行测试
-        self.progressBar = ProgressBar.ProgressBar()
-        worker = ProgressBar.Worker()
-        worker.progressBarValue.connect(self.progressBar.changeValue)
-        worker.start()
-        self.progressBar.exec_()
         # 首先判断展示是使用已有的对比还是重新对比
         alreadyComparedVersion = self.moduleResult[0]
         if newCompare:
             if alreadyComparedVersion != self.backupComboBox.currentText():
+                # 在此处进行测试
+                self.progressBar = ProgressBar.ProgressBar()
+                worker = ProgressBar.Worker()
+                worker.progressBarValue.connect(self.progressBar.changeValue)
+                worker.start()
+                self.progressBar.exec_()
                 makeContrast(self.backupComboBox.currentText())
                 modelPage.Ui_MainWindow.moduleResult = getModuleResult()
                 modelPage.Ui_MainWindow.contrastInfo = getCurContrastInfo()
