@@ -80,18 +80,17 @@ class OverallPage(modelPage.Ui_MainWindow):
         # 首先判断展示是使用已有的对比还是重新对比
         alreadyComparedVersion = self.moduleResult[0]
         if newCompare:
-            if alreadyComparedVersion != self.backupComboBox.currentText():
-                # 在此处进行测试
-                self.progressBar = ProgressBar.ProgressBar()
-                worker = Worker(self.backupComboBox.currentText())
-                worker.progressBarValue.connect(self.progressBar.changeValue)
-                worker.closeDialog.connect(self.progressBar.closeDialog)
-                worker.start()
-                self.progressBar.exec_()
-                #makeContrast(self.backupComboBox.currentText())
-                modelPage.Ui_MainWindow.moduleResult = getModuleResult()
-                modelPage.Ui_MainWindow.contrastInfo = getCurContrastInfo()
-                self.loadData()
+            # 在此处进行测试
+            self.progressBar = ProgressBar.ProgressBar()
+            worker = Worker(self.backupComboBox.currentText())
+            worker.progressBarValue.connect(self.progressBar.changeValue)
+            worker.closeDialog.connect(self.progressBar.closeDialog)
+            worker.start()
+            self.progressBar.exec_()
+            # makeContrast(self.backupComboBox.currentText())
+            modelPage.Ui_MainWindow.moduleResult = getModuleResult()
+            modelPage.Ui_MainWindow.contrastInfo = getCurContrastInfo()
+            self.loadData()
         # 设置表格控件
         self.reporTable = QtWidgets.QTableWidget()
         self.reporTable.setColumnCount(3)
