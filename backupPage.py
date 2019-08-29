@@ -227,7 +227,12 @@ class BackupPage(modelPage.Ui_MainWindow):
         if self.confirmBtnGroup.checkedId() == -1:
             QMessageBox.question(self, 'Message', "请选择一个备份版本", QMessageBox.Yes, QMessageBox.Yes)
             return
-        makeContrast(self.backupTable.item(self.confirmBtnGroup.checkedId(), 1).text())
+        self.close()
+        self.pageList[0].loadData()
+        self.pageList[0].show()
+        self.pageList[0].backupComboBox.setCurrentText(self.backupTable.item(self.confirmBtnGroup.checkedId(), 1).text())
+        self.pageList[0].showTable(True)
+        #makeContrast(self.backupTable.item(self.confirmBtnGroup.checkedId(), 1).text())
 
 
     def navigationWidget_currentItemChanged(self):
