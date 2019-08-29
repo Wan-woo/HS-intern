@@ -42,6 +42,8 @@ def getModuleResult():
                     changeTableList.append(table)
         if len(changeTableList)!=0:
             changeModuleTableDict[module] = changeTableList
-            changeModuleProcedureDict[module] = []
-            changeModuleViewDict[module] = []
+        else:
+            changeModuleTableDict[module] = []
+        changeModuleProcedureDict[module] = []
+        changeModuleViewDict[module] = []
     return [contrastVersion,changeModuleTableDict,changeModuleProcedureDict,changeModuleViewDict]
