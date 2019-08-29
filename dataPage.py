@@ -19,6 +19,7 @@ class DataPage(modelPage.Ui_MainWindow):
 
         # 设置的当前的tableName
         self.tableName = None
+        self.buttonGroup = QButtonGroup()
 
         # 设置一个横向的Layout
         self.inputLayout = QHBoxLayout()
@@ -109,7 +110,6 @@ class DataPage(modelPage.Ui_MainWindow):
         pass
 
     def loadTableInfo(self, tableList):
-        self.buttonGroup = QButtonGroup()
         self.compareTable.setRowCount(len(tableList))
         i = 0
         for tableName in tableList:
@@ -207,6 +207,8 @@ class DataPage(modelPage.Ui_MainWindow):
                         self.newTable.item(i, j).setForeground(QBrush(QColor(220, 20, 60)))
 
     def comboBox_currentIndexChanged(self):
+        if self.buttonGroup.checkedId() != -1:
+            self.tableName = self.compareTable.item(self.buttonGroup.checkedId(), 1).text()
         if self.tableName != None:
             self.buttonGroup_clicked(self.tableName)
 
