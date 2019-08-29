@@ -15,6 +15,8 @@ from backGround.testConnection import getSqliteConnection,getOrcaleConnection,sq
 import cx_Oracle
 import os
 import logging
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"    # 日志格式化输出
 DATE_FORMAT = "%m/%d/%Y %H:%M:%S %p"                        # 日期格式
@@ -198,6 +200,90 @@ def getCurContrastInfo():
     return [str(curBackupVersion),tableList, produceList, viewList, fieldDicts,resultDicts]
 
 # logging.debug(getCurcontrastInfo())
+
+
+
+
+class Worker(QThread):
+
+    progressBarValue = pyqtSignal(int)  # 更新进度条
+    closeDialog = pyqtSignal()    # 关闭Dialog
+
+    def __init__(self, backupVersion):
+        super(Worker, self).__init__()
+        self.backupVersion = backupVersion
+
+    def run(self):
+        truncateSql = "truncate table contrastResults"
+        oracleNoFetch(truncateSql)
+
+        [[beginTime, endTime], ] = getBackupTime(self.backupVersion)
+
+        tableAndBackupList = getObjectByVersion(self.backupVersion)[0]
+
+        tableList = []
+        backupTableList = []
+
+        for object in tableAndBackupList:
+            tableList.append(object[0])
+            backupTableList.append('backup' + str(object[1]))
+        for index in range(len(tableList)):
+            self.progressBarValue.emit((index+1)/len(tableList)*100)
+            [fieldList, keyList] = getbackupFieldKey(tableList[index])
+
+            fieldStr = fieldListToStr(fieldList)
+            keyStr = fieldListToStr(keyList)
+            if 'CREATE_DATE' in fieldList:
+                deleteSql = 'select %s from %s MINUS select %s from %s where CREATE_DATE BETWEEN %s  AND %s' % (
+                keyStr, tableList[index], keyStr, backupTableList[index], beginTime, endTime)
+                insertSql = 'select %s from %s MINUS select %s from %s where CREATE_DATE BETWEEN %s  AND %s' % (
+                keyStr, backupTableList[index], keyStr, tableList[index], beginTime, endTime)
+                sameSql = 'select %s from (select %s from %s intersect select %s from %s where CREATE_DATE BETWEEN %s  AND %s)' % (
+                keyStr, fieldStr, tableList[index], fieldStr, backupTableList[index], beginTime, endTime)
+                updateSql = '(select %s from %s intersect select %s from %s where CREATE_DATE BETWEEN %s  AND %s)minus ' \
+                            '(select %s from (%s))' % (
+                            keyStr, tableList[index], keyStr, backupTableList[index], beginTime, endTime, keyStr,
+                            sameSql)
+            elif 'VC_UPDATETIME' in fieldList:
+                deleteSql = 'select %s from %s MINUS select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s' % (
+                keyStr, tableList[index], keyStr, backupTableList[index], str(beginTime) + '000000',
+                str(endTime) + '000000')
+                insertSql = 'select %s from %s MINUS select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s' % (
+                keyStr, backupTableList[index], keyStr, tableList[index], str(beginTime) + '000000',
+                str(endTime) + '000000')
+                sameSql = 'select %s from (select %s from %s intersect select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s)' % (
+                keyStr, fieldStr, tableList[index], fieldStr, backupTableList[index], str(beginTime) + '000000',
+                str(endTime) + '000000')
+                updateSql = '(select %s from %s intersect select %s from %s where VC_UPDATETIME BETWEEN %s  AND %s)minus ' \
+                            '(select %s from (%s))' % (
+                            keyStr, tableList[index], keyStr, backupTableList[index], str(beginTime) + '000000',
+                            str(endTime) + '000000', keyStr, sameSql)
+
+            else:
+
+                deleteSql = 'select %s from %s MINUS select %s from %s ' % (
+                keyStr, backupTableList[index], keyStr, tableList[index])
+                insertSql = 'select %s from %s MINUS select %s from %s ' % (
+                keyStr, tableList[index], keyStr, backupTableList[index])
+                sameSql = 'select %s from (select %s from %s intersect select %s from %s )' % (
+                keyStr, fieldStr, tableList[index], fieldStr, backupTableList[index])
+                updateSql = '(select %s from %s intersect select %s from %s )minus ' \
+                            '(select %s from (%s))' % (
+                            keyStr, tableList[index], keyStr, backupTableList[index], keyStr, sameSql)
+            # deleteSql = 'select %s from %s MINUS select %s from %s '%(keyStr,backupTableList[index],keyStr,tableList[index])
+            # insertSql = 'select %s from %s MINUS select %s from %s '%(keyStr,tableList[index],keyStr,backupTableList[index])
+            # sameSql = 'select %s from (select %s from %s intersect select %s from %s )'%(keyStr,fieldStr,tableList[index],fieldStr,backupTableList[index])
+            # updateSql = '(select %s from %s intersect select %s from %s )minus ' \
+            #                     '(select %s from (%s))'%(keyStr,tableList[index],keyStr,backupTableList[index],keyStr,sameSql)
+
+            deleteList = oracleExcute(deleteSql)
+            insertList = oracleExcute(insertSql)
+            sameList = oracleExcute(sameSql)
+            updateList = oracleExcute(updateSql)
+
+            saveContrast(tableList[index], keyList, deleteList, insertList, sameList, updateList)
+        changeCurContrast(self.backupVersion)
+        self.closeDialog.emit()
 
 
 

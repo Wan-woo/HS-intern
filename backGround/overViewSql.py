@@ -45,4 +45,3 @@ def getModuleResult():
             changeModuleProcedureDict[module] = []
             changeModuleViewDict[module] = []
     return [contrastVersion,changeModuleTableDict,changeModuleProcedureDict,changeModuleViewDict]
-logging.info(getModuleResult())

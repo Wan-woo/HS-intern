@@ -18,6 +18,9 @@ class ProgressBar(QDialog):
         self.progressBar.setValue(i)
         self.lable.setText(str(i))
 
+    def closeDialog(self):
+        self.close()
+
 
 class Worker(QThread):
 
@@ -31,3 +34,4 @@ class Worker(QThread):
         for i in range(101):
             time.sleep(0.1)
             self.progressBarValue.emit(i)  # 发送进度条的值 信号
+

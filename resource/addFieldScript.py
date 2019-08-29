@@ -13,7 +13,7 @@ from backGround.setupSql import getOracleInfo,tuplesToList,listsToList
 from backGround.testConnection import sqliteExecute,oracleExcute
 
 [tableList,produceList,viewList,fieldDicts] = getOracleInfo()
-tableList = sqliteExecute("select distinct(tableName) from backupFieldKey   ")
+tableList = sqliteExecute("select distinct(objectName) from moduleObject   ")
 tableList = tuplesToList(tableList)
 tableList = listsToList(tableList)
 for table in tableList:

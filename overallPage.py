@@ -83,11 +83,12 @@ class OverallPage(modelPage.Ui_MainWindow):
             if alreadyComparedVersion != self.backupComboBox.currentText():
                 # 在此处进行测试
                 self.progressBar = ProgressBar.ProgressBar()
-                worker = ProgressBar.Worker()
+                worker = Worker(self.backupComboBox.currentText())
                 worker.progressBarValue.connect(self.progressBar.changeValue)
+                worker.closeDialog.connect(self.progressBar.closeDialog)
                 worker.start()
                 self.progressBar.exec_()
-                makeContrast(self.backupComboBox.currentText())
+                #makeContrast(self.backupComboBox.currentText())
                 modelPage.Ui_MainWindow.moduleResult = getModuleResult()
                 modelPage.Ui_MainWindow.contrastInfo = getCurContrastInfo()
                 self.loadData()

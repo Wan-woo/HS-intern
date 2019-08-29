@@ -220,10 +220,14 @@ def getbackupFieldKey(tableName):
 
     fieldSql = 'SELECT fieldChosed from backupFieldKey where tableName = "%s" and fieldType = 1 '%(tableName)
     keySql = 'SELECT fieldChosed from backupFieldKey where tableName = "%s" and fieldType = 2'%(tableName)
+    # allfieldSql = 'SELECT DISTINCT(fieldChosed) from backupFieldKey where tableName = "%s"'%(tableName)
     fieldList = sqliteExecute(fieldSql)
     fieldList = listsToList(fieldList)
     keyList = sqliteExecute(keySql)
     keyList = listsToList(keyList)
+    # allList = sqliteExecute(allfieldSql)
+    # allList = listsToList(allList)
+
     return [fieldList,keyList]
 # logging.info(getbackupFieldKey("S_FA_YSS_GZB"))
 
