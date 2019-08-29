@@ -200,6 +200,7 @@ def createBackupTable(beginTime, endTime, tableList, backupVersionId):
             fieldStr += field + ','
         lenthField = len(fieldStr)
         fieldStr = fieldStr[0:lenthField - 1]
+
         if 'CREATE_DATE' in fieldList:
             createSql = 'create table  %s as select %s from %s WHERE CREATE_DATE between %s and %s' \
                         % ('backup' + str(startId), fieldStr, list, beginTime, endTime)
@@ -207,6 +208,9 @@ def createBackupTable(beginTime, endTime, tableList, backupVersionId):
             createSql = 'create table  %s as select %s from %s WHERE VC_UPDATETIME between %s and %s' \
                         % ('backup' + str(startId), fieldStr, list, str(beginTime)+'000000',str(endTime)+'000000')
         else:
+            createSql = 'create table  %s as select %s from %s ' \
+                        % ('backup' + str(startId), fieldStr, list)
+        if list == 'TDPF_TASKBUSIPARAMS':
             createSql = 'create table  %s as select %s from %s ' \
                         % ('backup' + str(startId), fieldStr, list)
         #无时间
