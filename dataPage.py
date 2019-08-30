@@ -128,10 +128,21 @@ class DataPage(modelPage.Ui_MainWindow):
             self.compareTable.setItem(i, 6, QTableWidgetItem(str(tableContrastResult[3])))
             self.buttonGroup.setId(radioBtn, i)
             i += 1
-        self.buttonGroup.buttonClicked.connect(self.buttonGroup_checked)
+        self.buttonGroup.buttonClicked.connect(self.buttonGroup_checked2)
         pass
 
+    def buttonGroup_checked2(self):
+        # 重新跳转至第一页
+        if self.buttonGroup.checkedId() == -1:
+            return
+        logging.info(self.buttonGroup.checkedId())
+        tableName = self.compareTable.item(self.buttonGroup.checkedId(), 1).text()
+        logging.info(tableName)
+        self.pageLable.setText('1')
+        self.buttonGroup_clicked(tableName)
+
     def buttonGroup_checked(self):
+        # 不重新跳转至第一页
         if self.buttonGroup.checkedId() == -1:
             return
         logging.info(self.buttonGroup.checkedId())
