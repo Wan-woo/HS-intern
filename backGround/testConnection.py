@@ -45,7 +45,7 @@ def connectOracle(userName, passWord, host, serviceName):
     gC.set_value('passWord', passWord)
     gC.set_value('host', host)
     gC.set_value('serviceName', serviceName)
-    return True
+    return True,'success'
 
 def getOrcaleConnection():
     gC._init()

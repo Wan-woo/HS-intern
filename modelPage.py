@@ -10,8 +10,8 @@
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from resource import NavigationWidgetUp
 from backGround.setupSql import *
+from resource import NavigationWidgetUp
 from backGround.backupSql import *
 from backGround.overViewSql import *
 from backGround.contrast import *
